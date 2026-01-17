@@ -1,11 +1,12 @@
-import {
-  codegenNativeComponent,
-  type ColorValue,
-  type ViewProps,
-} from 'react-native';
+import { codegenNativeComponent, type ViewProps } from 'react-native';
+import type { BubblingEventHandler } from 'react-native/Libraries/Types/CodegenTypes';
 
+interface TextChangeEvent {
+  value: string;
+}
 interface NativeProps extends ViewProps {
-  color?: ColorValue;
+  value?: string;
+  onTextChange?: BubblingEventHandler<Readonly<TextChangeEvent>>;
 }
 
 export default codegenNativeComponent<NativeProps>('ControlledInputView');

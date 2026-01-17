@@ -1,6 +1,5 @@
 package com.controlledinput
 
-import android.graphics.Color
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
@@ -8,6 +7,7 @@ import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.viewmanagers.ControlledInputViewManagerInterface
 import com.facebook.react.viewmanagers.ControlledInputViewManagerDelegate
+import com.facebook.react.common.MapBuilder
 
 @ReactModule(name = ControlledInputViewManager.NAME)
 class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
@@ -30,12 +30,18 @@ class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
     return ControlledInputView(context)
   }
 
-  @ReactProp(name = "color")
-  override fun setColor(view: ControlledInputView?, color: Int?) {
-    view?.setBackgroundColor(color ?: Color.TRANSPARENT)
+  @ReactProp(name = "value")
+  override fun setValue(view: ControlledInputView, value: String?) {
+    value?.let {
+      view.viewModel.setValue(value)
+    }
   }
 
   companion object {
     const val NAME = "ControlledInputView"
   }
+
+  override fun getExportedCustomDirectEventTypeConstants(): MutableMap<String, Any> = mutableMapOf(
+    TextChangeEvent.EVENT_NAME to MapBuilder.of("registrationName", "onTextChange")
+  )
 }

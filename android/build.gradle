@@ -1,6 +1,6 @@
 buildscript {
   ext.getExtOrDefault = {name ->
-    return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['ControlledInput_' + name]
+    return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['ControlledInput__' + name]
   }
 
   repositories {
@@ -12,17 +12,19 @@ buildscript {
     classpath "com.android.tools.build:gradle:8.7.2"
     // noinspection DifferentKotlinGradleVersion
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}"
+    classpath "org.jetbrains.kotlin.plugin.compose:org.jetbrains.kotlin.plugin.compose.gradle.plugin:${getExtOrDefault('kotlinVersion')}"
   }
 }
 
 
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
+apply plugin: "org.jetbrains.kotlin.plugin.compose"
 
 apply plugin: "com.facebook.react"
 
 def getExtOrIntegerDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["ControlledInput_" + name]).toInteger()
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["ControlledInput__" + name]).toInteger()
 }
 
 android {
@@ -37,6 +39,7 @@ android {
 
   buildFeatures {
     buildConfig true
+    compose true
   }
 
   buildTypes {
@@ -74,4 +77,16 @@ def kotlin_version = getExtOrDefault("kotlinVersion")
 dependencies {
   implementation "com.facebook.react:react-android"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+  // Material Components (for BottomSheetDialog)
+  implementation 'com.google.android.material:material:1.13.0'
+
+  // Jetpack Compose dependencies
+  def composeBom = platform('androidx.compose:compose-bom:2025.12.01')
+  implementation composeBom
+  implementation 'androidx.compose.ui:ui'
+  implementation 'androidx.compose.ui:ui-tooling-preview'
+  implementation 'androidx.compose.material3:material3'
+  implementation 'androidx.activity:activity-compose:1.12.2'
+  debugImplementation 'androidx.compose.ui:ui-tooling'
 }

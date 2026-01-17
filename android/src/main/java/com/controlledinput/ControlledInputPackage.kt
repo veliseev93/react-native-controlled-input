@@ -1,4 +1,4 @@
-package com.controlledinput
+package com.controlledinput;
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

@@ -1,10 +1,19 @@
+import { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ControlledInputView } from 'react-native-controlled-input';
 
 export default function App() {
+  const [value, setValue] = useState('');
+
   return (
     <View style={styles.container}>
-      <ControlledInputView color="#32a852" style={styles.box} />
+      <ControlledInputView
+        value={value}
+        onTextChange={(event) => {
+          setValue(event.nativeEvent.value.replace(/\d/g, ''));
+        }}
+        style={styles.box}
+      />
     </View>
   );
 }
@@ -14,10 +23,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'green',
   },
   box: {
-    width: 60,
+    width: '100%',
     height: 60,
     marginVertical: 20,
+    backgroundColor: 'red',
   },
 });
