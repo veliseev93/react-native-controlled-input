@@ -25,7 +25,6 @@ class ControlledInputView : LinearLayout {
   }
 
   internal lateinit var viewModel: JetpackComposeViewModel
-  internal lateinit var valueFromJs: String
 
   private fun configureComponent(context: Context) {
 
@@ -45,10 +44,9 @@ class ControlledInputView : LinearLayout {
 
 
       it.setContent {
-        val valueFromJs = viewModel.value.collectAsState().value
+        val value = viewModel.value.collectAsState().value
         JetpackComposeView(
-          viewModel = viewModel,
-          value = valueFromJs,
+          value = value,
           onTextChange = { value ->
             val surfaceId = UIManagerHelper.getSurfaceId(context)
             val viewId = this.id

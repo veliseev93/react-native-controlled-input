@@ -27,7 +27,7 @@ import com.facebook.react.uimanager.events.Event
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 @Composable
-fun JetpackComposeView(viewModel: JetpackComposeViewModel, value: String, onTextChange: (value: String)  -> Unit) {
+fun JetpackComposeView(value: String, onTextChange: (value: String)  -> Unit) {
   val state = remember { TextFieldState(value) }
 
   if (state.text.toString() != value) {
@@ -42,8 +42,7 @@ fun JetpackComposeView(viewModel: JetpackComposeViewModel, value: String, onText
         proposed
       },
       modifier = Modifier
-        .fillMaxWidth()
-        .background(Color.Blue),
+        .fillMaxWidth(),
       textStyle = TextStyle(
         color = Color.White,
         fontSize = 24.sp,
