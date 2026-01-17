@@ -62,6 +62,30 @@ class ControlledInputView : LinearLayout {
                   value
                 )
               )
+          },
+          onFocus = {
+            val surfaceId = UIManagerHelper.getSurfaceId(context)
+            val viewId = this.id
+            UIManagerHelper
+              .getEventDispatcherForReactTag(context as ReactContext, viewId)
+              ?.dispatchEvent(
+                FocusEvent(
+                  surfaceId,
+                  viewId
+                )
+              )
+          },
+          onBlur = {
+            val surfaceId = UIManagerHelper.getSurfaceId(context)
+            val viewId = this.id
+            UIManagerHelper
+              .getEventDispatcherForReactTag(context as ReactContext, viewId)
+              ?.dispatchEvent(
+                BlurEvent(
+                  surfaceId,
+                  viewId
+                )
+              )
           }
         )
       }

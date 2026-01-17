@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { View, StyleSheet, TextInput } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { ControlledInputView } from 'react-native-controlled-input';
 
 export default function App() {
   const [value, setValue] = useState('');
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      contentContainerStyle={{ flex: 1, backgroundColor: 'green' }}
+      style={styles.container}
+      keyboardShouldPersistTaps="never"
+    >
       <ControlledInputView
         value={value}
         onTextChange={(event) => {
@@ -14,22 +18,20 @@ export default function App() {
         }}
         style={styles.box}
         inputStyle={styles.textInput}
+        onFocus={() => {
+          console.log('onFocus');
+        }}
+        onBlur={() => {
+          console.log('onBlur');
+        }}
       />
-      <TextInput
-        style={{ color: 'white', backgroundColor: 'white' }}
-        value={value}
-        onChangeText={setValue}
-      />
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
-    justifyContent: 'center',
-    backgroundColor: 'green',
   },
   box: {
     width: '100%',

@@ -1,6 +1,5 @@
 package com.controlledinput
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,9 +10,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.byValue
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.foundation.text.input.setTextAndSelectAll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.FocusInteraction
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -43,15 +42,31 @@ data class InputStyle(
 
 @Composable
 fun JetpackComposeView(
-  value: String,
+  value: String,  
   inputStyle: StateFlow<InputStyle?>,
-  onTextChange: (value: String) -> Unit
+  onTextChange: (value: String) -> Unit,
+  onFocus: (() -> Unit)? = null,
+  onBlur: (() -> Unit)? = null
 ) {
   val state = remember { TextFieldState(value) }
   val style by inputStyle.collectAsState()
+  val interactionSource = remember { MutableInteractionSource() }
 
   if (state.text.toString() != value) {
     state.setTextAndPlaceCursorAtEnd(value)
+  }
+
+  LaunchedEffect(interactionSource) {
+    interactionSource.interactions.collect { interaction ->
+      when (interaction) {
+        is FocusInteraction.Focus -> {
+          onFocus?.invoke()
+        }
+        is FocusInteraction.Unfocus -> {
+          onBlur?.invoke()
+        }
+      }
+    }
   }
 
   val textColor = style?.color?.let { Color(android.graphics.Color.parseColor(it)) } ?: Color.White
@@ -79,6 +94,7 @@ fun JetpackComposeView(
         color = textColor,
         fontSize = fontSize,
       ),
+      interactionSource = interactionSource,
     )
   }
 }
@@ -99,6 +115,36 @@ class TextChangeEvent(
 
   companion object {
     const val EVENT_NAME = "onTextChange"
+  }
+}
+
+class FocusEvent(
+  surfaceId: Int,
+  viewId: Int,
+) : Event<FocusEvent>(surfaceId, viewId) {
+  override fun getEventName() = EVENT_NAME
+
+  override fun getCoalescingKey(): Short = 0
+
+  override fun getEventData(): WritableMap? = Arguments.createMap()
+
+  companion object {
+    const val EVENT_NAME = "onFocus"
+  }
+}
+
+class BlurEvent(
+  surfaceId: Int,
+  viewId: Int,
+) : Event<BlurEvent>(surfaceId, viewId) {
+  override fun getEventName() = EVENT_NAME
+
+  override fun getCoalescingKey(): Short = 0
+
+  override fun getEventData(): WritableMap? = Arguments.createMap()
+
+  companion object {
+    const val EVENT_NAME = "onBlur"
   }
 }
 

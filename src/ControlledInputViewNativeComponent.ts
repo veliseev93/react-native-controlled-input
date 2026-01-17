@@ -8,6 +8,14 @@ interface TextChangeEvent {
   value: string;
 }
 
+interface FocusEvent {
+  // Empty event
+}
+
+interface BlurEvent {
+  // Empty event
+}
+
 interface InputStyle {
   color?: string;
   fontSize?: Double;
@@ -22,6 +30,8 @@ interface NativeProps extends ViewProps {
   value?: string;
   inputStyle?: InputStyle;
   onTextChange?: BubblingEventHandler<Readonly<TextChangeEvent>>;
+  onFocus?: BubblingEventHandler<Readonly<FocusEvent>>;
+  onBlur?: BubblingEventHandler<Readonly<BlurEvent>>;
 }
 
 export default codegenNativeComponent<NativeProps>('ControlledInputView');
