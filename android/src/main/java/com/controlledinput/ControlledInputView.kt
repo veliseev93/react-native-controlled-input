@@ -13,9 +13,11 @@ class ControlledInputView : LinearLayout {
   constructor(context: Context) : super(context) {
     configureComponent(context)
   }
+
   constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
     configureComponent(context)
   }
+
   constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
     context,
     attrs,
@@ -47,6 +49,7 @@ class ControlledInputView : LinearLayout {
         val value = viewModel.value.collectAsState().value
         JetpackComposeView(
           value = value,
+          inputStyle = viewModel.inputStyle,
           onTextChange = { value ->
             val surfaceId = UIManagerHelper.getSurfaceId(context)
             val viewId = this.id
@@ -60,10 +63,10 @@ class ControlledInputView : LinearLayout {
                 )
               )
           }
-          )
+        )
       }
       addView(it)
 
+    }
   }
-}
 }

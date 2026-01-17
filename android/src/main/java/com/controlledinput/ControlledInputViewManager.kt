@@ -1,5 +1,6 @@
 package com.controlledinput
 
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
@@ -35,6 +36,24 @@ class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
     value?.let {
       view.viewModel.setValue(value)
     }
+  }
+
+  @ReactProp(name = "inputStyle")
+  override fun setInputStyle(view: ControlledInputView, inputStyle: ReadableMap?) {
+    val style = if (inputStyle == null) {
+      null
+    } else {
+      InputStyle(
+        color = if (inputStyle.hasKey("color")) inputStyle.getString("color") else null,
+        fontSize = if (inputStyle.hasKey("fontSize")) inputStyle.getDouble("fontSize") else null,
+        height = if (inputStyle.hasKey("height")) inputStyle.getDouble("height") else null,
+        paddingTop = if (inputStyle.hasKey("paddingTop")) inputStyle.getDouble("paddingTop") else null,
+        paddingBottom = if (inputStyle.hasKey("paddingBottom")) inputStyle.getDouble("paddingBottom") else null,
+        paddingLeft = if (inputStyle.hasKey("paddingLeft")) inputStyle.getDouble("paddingLeft") else null,
+        paddingRight = if (inputStyle.hasKey("paddingRight")) inputStyle.getDouble("paddingRight") else null,
+      )
+    }
+    view.viewModel.setInputStyle(style)
   }
 
   companion object {
