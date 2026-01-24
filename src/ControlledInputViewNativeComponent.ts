@@ -24,6 +24,9 @@ interface InputStyle {
   paddingBottom?: Double;
   paddingLeft?: Double;
   paddingRight?: Double;
+  borderWidth?: Double;
+  borderRadius?: Double;
+  borderColor?: string;
 }
 
 interface NativeProps extends ViewProps {

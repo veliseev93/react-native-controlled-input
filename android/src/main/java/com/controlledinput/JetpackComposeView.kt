@@ -1,6 +1,9 @@
 package com.controlledinput
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +43,9 @@ data class InputStyle(
   val paddingBottom: Double? = null,
   val paddingLeft: Double? = null,
   val paddingRight: Double? = null,
+  val borderWidth: Double? = null,
+  val borderRadius: Double? = null,
+  val borderColor: String? = null,
 )
 
 @Composable
@@ -81,8 +87,17 @@ fun JetpackComposeView(
     end = style?.paddingRight?.dp ?: 0.dp,
     bottom = style?.paddingBottom?.dp ?: 0.dp,
   )
+  val borderWidth = style?.borderWidth?.dp ?: 0.dp
+  val borderRadius = style?.borderRadius?.dp ?: 0.dp
+  val borderColor = style?.borderColor?.let { Color(android.graphics.Color.parseColor(it)) } ?: Color.Transparent
 
-  Column(modifier = Modifier.fillMaxSize()) {
+  Box(
+    modifier = Modifier
+      .fillMaxWidth()
+      .then(height?.let { Modifier.height(it) } ?: Modifier)
+      .clip(RoundedCornerShape(borderRadius))
+      .border(borderWidth, borderColor, RoundedCornerShape(borderRadius))
+  ) {
     BasicTextField(
       state,
       inputTransformation = InputTransformation.byValue { _, proposed ->
@@ -91,7 +106,6 @@ fun JetpackComposeView(
       },
       modifier = Modifier
         .fillMaxWidth()
-        .then(height?.let { Modifier.height(it) } ?: Modifier)
         .padding(paddingValues)
         .focusRequester(focusRequester),
       textStyle = TextStyle(
