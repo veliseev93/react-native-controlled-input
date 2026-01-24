@@ -1,13 +1,21 @@
 package com.controlledinput
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalFocusManager
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.uimanager.UIManagerHelper
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class ControlledInputView : LinearLayout {
   constructor(context: Context) : super(context) {
@@ -27,10 +35,21 @@ class ControlledInputView : LinearLayout {
   }
 
   internal lateinit var viewModel: JetpackComposeViewModel
+  private val blurSignal = MutableStateFlow(0)
+
+  fun blur() {
+    // триггерим compose снять фокус
+    blurSignal.value = blurSignal.value + 1
+
+    // на всякий случай прячем клавиатуру на уровне View
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(windowToken, 0)
+
+    // и снимаем фокус у самого android view (не всегда достаточно, но не мешает)
+    clearFocus()
+  }
 
   private fun configureComponent(context: Context) {
-
-    viewModel = JetpackComposeViewModel()
 
     layoutParams = LayoutParams(
       LayoutParams.WRAP_CONTENT,
@@ -43,10 +62,19 @@ class ControlledInputView : LinearLayout {
         LayoutParams.WRAP_CONTENT
       )
 
-
+      viewModel = JetpackComposeViewModel()
 
       it.setContent {
         val value = viewModel.value.collectAsState().value
+        val blurTick by blurSignal.collectAsState()
+        val focusManager = LocalFocusManager.current
+        val focusRequester = remember { FocusRequester() }
+
+        // при каждом blurTick снимаем фокус в compose
+        LaunchedEffect(blurTick) {
+          focusManager.clearFocus(force = true)
+        }
+
         JetpackComposeView(
           value = value,
           inputStyle = viewModel.inputStyle,
@@ -86,7 +114,8 @@ class ControlledInputView : LinearLayout {
                   viewId
                 )
               )
-          }
+          },
+          focusRequester = focusRequester
         )
       }
       addView(it)

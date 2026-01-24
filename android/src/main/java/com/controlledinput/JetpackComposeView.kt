@@ -19,6 +19,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -42,11 +44,12 @@ data class InputStyle(
 
 @Composable
 fun JetpackComposeView(
-  value: String,  
+  value: String,
   inputStyle: StateFlow<InputStyle?>,
   onTextChange: (value: String) -> Unit,
   onFocus: (() -> Unit)? = null,
-  onBlur: (() -> Unit)? = null
+  onBlur: (() -> Unit)? = null,
+  focusRequester: FocusRequester,
 ) {
   val state = remember { TextFieldState(value) }
   val style by inputStyle.collectAsState()
@@ -89,7 +92,8 @@ fun JetpackComposeView(
       modifier = Modifier
         .fillMaxWidth()
         .then(height?.let { Modifier.height(it) } ?: Modifier)
-        .padding(paddingValues),
+        .padding(paddingValues)
+        .focusRequester(focusRequester),
       textStyle = TextStyle(
         color = textColor,
         fontSize = fontSize,

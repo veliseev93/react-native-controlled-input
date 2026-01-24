@@ -1,18 +1,41 @@
-import { useState } from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { useRef, useState } from 'react';
+import {
+  StyleSheet,
+  ScrollView,
+  findNodeHandle,
+  UIManager,
+  Button,
+  TextInput,
+} from 'react-native';
 import { ControlledInputView } from 'react-native-controlled-input';
 
 export default function App() {
   const [value, setValue] = useState('');
+  const inputRef = useRef(null);
 
+  function blurNative(ref: any) {
+    const tag = findNodeHandle(ref);
+    if (!tag) return;
+
+    // Paper:
+    UIManager.dispatchViewManagerCommand(
+      tag,
+      UIManager.getViewManagerConfig('ControlledInputView').Commands.blur,
+      []
+    );
+
+    // Если Fabric — будет другая функция (через native commands из codegen).
+  }
   return (
     <ScrollView
       contentContainerStyle={{ flex: 1, backgroundColor: 'green' }}
       style={styles.container}
-      keyboardShouldPersistTaps="never"
+      keyboardShouldPersistTaps="handled"
+      onTouchStart={() => blurNative(inputRef.current)}
     >
       <ControlledInputView
         value={value}
+        ref={inputRef}
         onTextChange={(event) => {
           setValue(event.nativeEvent.value.replace(/\d/g, ''));
         }}
@@ -25,6 +48,8 @@ export default function App() {
           console.log('onBlur');
         }}
       />
+      <Button title="Blur" onPress={() => blurNative(inputRef.current)} />
+      <TextInput placeholder="Enter text" />
     </ScrollView>
   );
 }

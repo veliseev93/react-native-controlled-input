@@ -1,5 +1,6 @@
 package com.controlledinput
 
+import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.SimpleViewManager
@@ -29,6 +30,16 @@ class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
 
   public override fun createViewInstance(context: ThemedReactContext): ControlledInputView {
     return ControlledInputView(context)
+  }
+
+  override fun getCommandsMap(): Map<String, Int> {
+    return mapOf("blur" to 1)
+  }
+
+  override fun receiveCommand(view: ControlledInputView, commandId: Int, args: ReadableArray?) {
+    when (commandId) {
+      1 -> view.blur()
+    }
   }
 
   @ReactProp(name = "value")
