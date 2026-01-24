@@ -1,4 +1,8 @@
-import { codegenNativeComponent, type ViewProps } from 'react-native';
+import {
+  codegenNativeComponent,
+  type ViewProps,
+  type ColorValue,
+} from 'react-native';
 import type {
   BubblingEventHandler,
   Double,
@@ -17,7 +21,7 @@ interface BlurEvent {
 }
 
 interface InputStyle {
-  color?: string;
+  color?: ColorValue;
   fontSize?: Double;
   height?: Double;
   paddingTop?: Double;
@@ -26,7 +30,7 @@ interface InputStyle {
   paddingRight?: Double;
   borderWidth?: Double;
   borderRadius?: Double;
-  borderColor?: string;
+  borderColor?: ColorValue;
 }
 
 interface NativeProps extends ViewProps {
