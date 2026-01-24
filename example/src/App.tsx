@@ -11,8 +11,7 @@ export default function App() {
 
   return (
     <ScrollView
-      contentContainerStyle={{ flex: 1, backgroundColor: 'green' }}
-      style={styles.container}
+      contentContainerStyle={styles.container}
       keyboardShouldPersistTaps="handled"
       onTouchStart={() => inputRef.current?.blur()}
     >
@@ -39,6 +38,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 250,
   },
   box: {
     width: '100%',
