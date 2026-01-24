@@ -31,7 +31,7 @@ export default function App() {
           console.log('onBlur');
         }}
       />
-      <Button title="Blur" onPress={() => inputRef.current?.blur()} />
+      <Button title="Focus" onPress={() => inputRef.current?.focus()} />
     </ScrollView>
   );
 }

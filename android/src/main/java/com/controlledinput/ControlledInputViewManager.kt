@@ -33,12 +33,13 @@ class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
   }
 
   override fun getCommandsMap(): Map<String, Int> {
-    return mapOf("blur" to 1)
+    return mapOf("blur" to 1, "focus" to 2)
   }
 
   override fun receiveCommand(view: ControlledInputView, commandId: Int, args: ReadableArray?) {
     when (commandId) {
       1 -> view.blur()
+      2 -> view.focus()
     }
   }
 

@@ -36,6 +36,7 @@ class ControlledInputView : LinearLayout {
 
   internal lateinit var viewModel: JetpackComposeViewModel
   private val blurSignal = MutableStateFlow(0)
+  private val focusSignal = MutableStateFlow(0)
 
   fun blur() {
     // триггерим compose снять фокус
@@ -47,6 +48,11 @@ class ControlledInputView : LinearLayout {
 
     // и снимаем фокус у самого android view (не всегда достаточно, но не мешает)
     clearFocus()
+  }
+
+  fun focus() {
+    // триггерим compose запросить фокус
+    focusSignal.value = focusSignal.value + 1
   }
 
   private fun configureComponent(context: Context) {
@@ -67,12 +73,22 @@ class ControlledInputView : LinearLayout {
       it.setContent {
         val value = viewModel.value.collectAsState().value
         val blurTick by blurSignal.collectAsState()
+        val focusTick by focusSignal.collectAsState()
         val focusManager = LocalFocusManager.current
         val focusRequester = remember { FocusRequester() }
 
         // при каждом blurTick снимаем фокус в compose
         LaunchedEffect(blurTick) {
-          focusManager.clearFocus(force = true)
+          if (blurTick > 0) {
+            focusManager.clearFocus(force = true)
+          }
+        }
+
+        // при каждом focusTick запрашиваем фокус в compose
+        LaunchedEffect(focusTick) {
+          if (focusTick > 0) {
+            focusRequester.requestFocus()
+          }
         }
 
         JetpackComposeView(

@@ -16,6 +16,7 @@ type NativeProps = ComponentProps<typeof ControlledInputViewNativeComponent>;
 
 export interface ControlledInputViewRef {
   blur: () => void;
+  focus: () => void;
 }
 
 export const ControlledInputView = forwardRef<
@@ -34,6 +35,17 @@ export const ControlledInputView = forwardRef<
           'ControlledInputView'
         ) as any;
         UIManager.dispatchViewManagerCommand(tag, config.Commands.blur, []);
+      }
+    },
+    focus: () => {
+      const tag = findNodeHandle(nativeRef.current);
+      if (!tag) return;
+
+      if (Platform.OS === 'android' || Platform.OS === 'ios') {
+        const config = UIManager.getViewManagerConfig(
+          'ControlledInputView'
+        ) as any;
+        UIManager.dispatchViewManagerCommand(tag, config.Commands.focus, []);
       }
     },
   }));
