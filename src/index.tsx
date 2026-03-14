@@ -5,7 +5,7 @@ import {
   type ComponentProps,
   type ElementRef,
 } from 'react';
-import { findNodeHandle, UIManager, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import ControlledInputViewNativeComponent, {
   Commands,
 } from './ControlledInputViewNativeComponent';
@@ -26,51 +26,27 @@ export const ControlledInputView = forwardRef<
 
   useImperativeHandle(ref, () => ({
     blur: () => {
-      if (Platform.OS === 'ios') {
-        if (nativeRef.current) {
-          console.log('[ControlledInputView] iOS blur command -> native');
-          Commands.blur(nativeRef.current);
-        }
+      if (!nativeRef.current) {
         return;
       }
 
-      const tag = findNodeHandle(nativeRef.current);
-      if (!tag) {
-        return;
-      }
-
-      if (Platform.OS === 'android') {
-        const config = UIManager.getViewManagerConfig(
-          'ControlledInputView'
-        ) as any;
-        const command = config?.Commands?.blur;
-        if (command != null) {
-          UIManager.dispatchViewManagerCommand(tag, command, []);
-        }
+      if (Platform.OS === 'ios' || Platform.OS === 'android') {
+        console.log(
+          `[ControlledInputView] ${Platform.OS} blur command -> native`
+        );
+        Commands.blur(nativeRef.current);
       }
     },
     focus: () => {
-      if (Platform.OS === 'ios') {
-        if (nativeRef.current) {
-          console.log('[ControlledInputView] iOS focus command -> native');
-          Commands.focus(nativeRef.current);
-        }
+      if (!nativeRef.current) {
         return;
       }
 
-      const tag = findNodeHandle(nativeRef.current);
-      if (!tag) {
-        return;
-      }
-
-      if (Platform.OS === 'android') {
-        const config = UIManager.getViewManagerConfig(
-          'ControlledInputView'
-        ) as any;
-        const command = config?.Commands?.focus;
-        if (command != null) {
-          UIManager.dispatchViewManagerCommand(tag, command, []);
-        }
+      if (Platform.OS === 'ios' || Platform.OS === 'android') {
+        console.log(
+          `[ControlledInputView] ${Platform.OS} focus command -> native`
+        );
+        Commands.focus(nativeRef.current);
       }
     },
   }));
