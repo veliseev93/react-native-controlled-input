@@ -88,4 +88,21 @@ using namespace facebook::react;
     [super updateProps:props oldProps:oldProps];
 }
 
+- (void)handleCommand:(const NSString *)commandName args:(const NSArray *)args
+{
+    if ([commandName isEqualToString:@"focus"]) {
+        NSLog(@"[ControlledInputView] handleCommand focus");
+        [_inputView focus];
+        return;
+    }
+
+    if ([commandName isEqualToString:@"blur"]) {
+        NSLog(@"[ControlledInputView] handleCommand blur");
+        [_inputView blur];
+        return;
+    }
+
+    [super handleCommand:commandName args:args];
+}
+
 @end

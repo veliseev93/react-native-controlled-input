@@ -80,4 +80,12 @@ class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
     FocusEvent.EVENT_NAME to MapBuilder.of("registrationName", "onFocus"),
     BlurEvent.EVENT_NAME to MapBuilder.of("registrationName", "onBlur")
   )
+
+  override fun focus(view: ControlledInputView?) {
+    TODO("Not yet implemented")
+  }
+
+  override fun blur(view: ControlledInputView?) {
+    TODO("Not yet implemented")
+  }
 }

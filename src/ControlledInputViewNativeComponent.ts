@@ -2,7 +2,9 @@ import {
   codegenNativeComponent,
   type ViewProps,
   type ColorValue,
+  type HostComponent,
 } from 'react-native';
+import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
 import type {
   BubblingEventHandler,
   Double,
@@ -40,5 +42,14 @@ interface NativeProps extends ViewProps {
   onFocus?: BubblingEventHandler<Readonly<FocusEvent>>;
   onBlur?: BubblingEventHandler<Readonly<BlurEvent>>;
 }
+
+export interface NativeCommands {
+  focus: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
+  blur: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
+}
+
+export const Commands: NativeCommands = codegenNativeCommands<NativeCommands>({
+  supportedCommands: ['focus', 'blur'],
+});
 
 export default codegenNativeComponent<NativeProps>('ControlledInputView');

@@ -17,6 +17,20 @@ public class RNControlledInput: UIView {
     @objc public var borderRadius: CGFloat = 0
     @objc public var borderColor: UIColor?
 
+    public override var canBecomeFirstResponder: Bool {
+        true
+    }
+
+    @objc public func focus() {
+        print("[ControlledInputView] RNControlledInput.focus()")
+        _ = becomeFirstResponder()
+    }
+
+    @objc public func blur() {
+        print("[ControlledInputView] RNControlledInput.blur()")
+        _ = resignFirstResponder()
+    }
+
     @objc public override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .red

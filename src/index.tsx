@@ -3,14 +3,12 @@ import {
   useImperativeHandle,
   useRef,
   type ComponentProps,
+  type ElementRef,
 } from 'react';
-import {
-  findNodeHandle,
-  UIManager,
-  Platform,
-  type HostComponent,
-} from 'react-native';
-import ControlledInputViewNativeComponent from './ControlledInputViewNativeComponent';
+import { findNodeHandle, UIManager, Platform } from 'react-native';
+import ControlledInputViewNativeComponent, {
+  Commands,
+} from './ControlledInputViewNativeComponent';
 
 type NativeProps = ComponentProps<typeof ControlledInputViewNativeComponent>;
 
@@ -23,29 +21,56 @@ export const ControlledInputView = forwardRef<
   ControlledInputViewRef,
   NativeProps
 >((props, ref) => {
-  const nativeRef = useRef<HostComponent<NativeProps>>(null);
+  const nativeRef =
+    useRef<ElementRef<typeof ControlledInputViewNativeComponent>>(null);
 
   useImperativeHandle(ref, () => ({
     blur: () => {
-      const tag = findNodeHandle(nativeRef.current);
-      if (!tag) return;
+      if (Platform.OS === 'ios') {
+        if (nativeRef.current) {
+          console.log('[ControlledInputView] iOS blur command -> native');
+          Commands.blur(nativeRef.current);
+        }
+        return;
+      }
 
-      if (Platform.OS === 'android' || Platform.OS === 'ios') {
+      const tag = findNodeHandle(nativeRef.current);
+      if (!tag) {
+        return;
+      }
+
+      if (Platform.OS === 'android') {
         const config = UIManager.getViewManagerConfig(
           'ControlledInputView'
         ) as any;
-        UIManager.dispatchViewManagerCommand(tag, config.Commands.blur, []);
+        const command = config?.Commands?.blur;
+        if (command != null) {
+          UIManager.dispatchViewManagerCommand(tag, command, []);
+        }
       }
     },
     focus: () => {
-      const tag = findNodeHandle(nativeRef.current);
-      if (!tag) return;
+      if (Platform.OS === 'ios') {
+        if (nativeRef.current) {
+          console.log('[ControlledInputView] iOS focus command -> native');
+          Commands.focus(nativeRef.current);
+        }
+        return;
+      }
 
-      if (Platform.OS === 'android' || Platform.OS === 'ios') {
+      const tag = findNodeHandle(nativeRef.current);
+      if (!tag) {
+        return;
+      }
+
+      if (Platform.OS === 'android') {
         const config = UIManager.getViewManagerConfig(
           'ControlledInputView'
         ) as any;
-        UIManager.dispatchViewManagerCommand(tag, config.Commands.focus, []);
+        const command = config?.Commands?.focus;
+        if (command != null) {
+          UIManager.dispatchViewManagerCommand(tag, command, []);
+        }
       }
     },
   }));
