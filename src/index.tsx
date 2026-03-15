@@ -2,15 +2,13 @@ import {
   forwardRef,
   useImperativeHandle,
   useRef,
-  type ComponentProps,
   type ElementRef,
 } from 'react';
 import { Platform } from 'react-native';
 import ControlledInputViewNativeComponent, {
   Commands,
+  type NativeProps,
 } from './ControlledInputViewNativeComponent';
-
-type NativeProps = ComponentProps<typeof ControlledInputViewNativeComponent>;
 
 export interface ControlledInputViewRef {
   blur: () => void;
