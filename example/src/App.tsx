@@ -58,5 +58,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'green',
     borderRadius: 10,
+    fontFamily: 'AlbertSans-Regular',
   },
 });

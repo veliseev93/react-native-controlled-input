@@ -24,8 +24,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import android.graphics.Typeface
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -38,6 +41,7 @@ import kotlinx.coroutines.flow.StateFlow
 data class InputStyle(
   val color: String? = null,
   val fontSize: Double? = null,
+  val fontFamily: String? = null,
   val height: Double? = null,
   val paddingTop: Double? = null,
   val paddingBottom: Double? = null,
@@ -78,8 +82,20 @@ fun JetpackComposeView(
     }
   }
 
+  val context = LocalContext.current
   val textColor = style?.color?.let { Color(android.graphics.Color.parseColor(it)) } ?: Color.White
   val fontSize = style?.fontSize?.let { it.sp } ?: 24.sp
+  val fontFamily = remember(style?.fontFamily) {
+    style?.fontFamily?.let { name ->
+      listOf("ttf", "otf").firstNotNullOfOrNull { ext ->
+        try {
+          FontFamily(Typeface.createFromAsset(context.assets, "fonts/$name.$ext"))
+        } catch (_: Exception) {
+          null
+        }
+      }
+    }
+  }
   val height = style?.height?.let { it.dp }
   val paddingValues = PaddingValues(
     start = style?.paddingLeft?.dp ?: 0.dp,
@@ -111,6 +127,7 @@ fun JetpackComposeView(
       textStyle = TextStyle(
         color = textColor,
         fontSize = fontSize,
+        fontFamily = fontFamily,
       ),
       interactionSource = interactionSource,
     )

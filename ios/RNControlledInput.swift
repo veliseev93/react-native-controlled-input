@@ -11,6 +11,7 @@ public class RNControlledInput: UIView {
     
     @objc public var textColor: UIColor?
     @objc public var fontSize: CGFloat = 16
+    @objc public var fontFamily: String?
     @objc public var inputHeight: CGFloat = 0
     @objc public var padding: UIEdgeInsets = .zero
     @objc public var borderWidth: CGFloat = 0

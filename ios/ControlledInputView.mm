@@ -62,6 +62,10 @@ using namespace facebook::react;
         _inputView.fontSize = style.fontSize;
     }
     
+    if (oldStyle.fontFamily != style.fontFamily) {
+        _inputView.fontFamily = style.fontFamily.empty() ? nil : [NSString stringWithUTF8String:style.fontFamily.c_str()];
+    }
+    
     if (oldStyle.height != style.height) {
         _inputView.inputHeight = style.height;
     }
