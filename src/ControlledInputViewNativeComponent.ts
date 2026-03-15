@@ -35,7 +35,7 @@ interface InputStyle {
   borderColor?: ColorValue;
 }
 
-interface NativeProps extends ViewProps {
+export interface NativeProps extends ViewProps {
   value?: string;
   inputStyle?: InputStyle;
   onTextChange?: BubblingEventHandler<Readonly<TextChangeEvent>>;
