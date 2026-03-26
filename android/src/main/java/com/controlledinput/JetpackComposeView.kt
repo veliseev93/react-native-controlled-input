@@ -87,12 +87,12 @@ fun JetpackComposeView(
   val fontSize = style?.fontSize?.let { it.sp } ?: 24.sp
   val fontFamily = remember(style?.fontFamily) {
     style?.fontFamily?.let { name ->
-      listOf("ttf", "otf").firstNotNullOfOrNull { ext ->
-        try {
-          FontFamily(Typeface.createFromAsset(context.assets, "fonts/$name.$ext"))
-        } catch (_: Exception) {
-          null
-        }
+      try {
+        val typeface = com.facebook.react.views.text.ReactFontManager.getInstance()
+          .getTypeface(name, Typeface.NORMAL, context.assets)
+        typeface?.let { FontFamily(it) }
+      } catch (_: Exception) {
+        null
       }
     }
   }
