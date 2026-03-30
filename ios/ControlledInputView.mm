@@ -10,12 +10,13 @@
 #import <React/RCTFabricComponentsPlugins.h>
 
 #import <react/renderer/components/ControlledInputViewSpec/ComponentDescriptors.h>
+#import <react/renderer/components/ControlledInputViewSpec/EventEmitters.h>
 #import <react/renderer/components/ControlledInputViewSpec/Props.h>
 #import <react/renderer/components/ControlledInputViewSpec/RCTComponentViewHelpers.h>
 
 using namespace facebook::react;
 
-@interface ControlledInputView () <RCTControlledInputViewViewProtocol>
+@interface ControlledInputView () <RCTControlledInputViewViewProtocol, RNControlledInputDelegate>
 @end
 
 @implementation ControlledInputView {
@@ -34,6 +35,7 @@ using namespace facebook::react;
     _props = defaultProps;
 
     _inputView = [[RNControlledInput alloc] initWithFrame:self.bounds];
+    _inputView.delegate = self;
 
     self.contentView = _inputView;
   }
@@ -107,6 +109,20 @@ using namespace facebook::react;
     }
 
     [super handleCommand:commandName args:args];
+}
+
+- (void)controlledInputDidChangeText:(RNControlledInput *)input value:(NSString *)value
+{
+    if (_eventEmitter == nullptr) {
+        return;
+    }
+
+    const auto eventEmitter = std::static_pointer_cast<const ControlledInputViewEventEmitter>(_eventEmitter);
+    const char *utf8Value = value.UTF8String ?: "";
+
+    eventEmitter->onTextChange(ControlledInputViewEventEmitter::OnTextChange {
+        .value = std::string(utf8Value),
+    });
 }
 
 @end

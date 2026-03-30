@@ -4,7 +4,7 @@ import {
   useRef,
   type ElementRef,
 } from 'react';
-import { Platform } from 'react-native';
+import { Platform, processColor } from 'react-native';
 import ControlledInputViewNativeComponent, {
   Commands,
   type NativeProps,
@@ -21,6 +21,23 @@ export const ControlledInputView = forwardRef<
 >((props, ref) => {
   const nativeRef =
     useRef<ElementRef<typeof ControlledInputViewNativeComponent>>(null);
+  const nativeProps =
+    Platform.OS === 'ios' && props.inputStyle
+      ? {
+          ...props,
+          inputStyle: {
+            ...props.inputStyle,
+            color:
+              props.inputStyle.color == null
+                ? props.inputStyle.color
+                : processColor(props.inputStyle.color),
+            borderColor:
+              props.inputStyle.borderColor == null
+                ? props.inputStyle.borderColor
+                : processColor(props.inputStyle.borderColor),
+          },
+        }
+      : props;
 
   useImperativeHandle(ref, () => ({
     blur: () => {
@@ -50,7 +67,10 @@ export const ControlledInputView = forwardRef<
   }));
 
   return (
-    <ControlledInputViewNativeComponent {...props} ref={nativeRef as any} />
+    <ControlledInputViewNativeComponent
+      {...nativeProps}
+      ref={nativeRef as any}
+    />
   );
 });
 
