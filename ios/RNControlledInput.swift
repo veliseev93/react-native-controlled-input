@@ -2,6 +2,8 @@ import UIKit
 
 @objc public protocol RNControlledInputDelegate: AnyObject {
     func controlledInputDidChangeText(_ input: RNControlledInput, value: String)
+    func controlledInputDidFocus(_ input: RNControlledInput)
+    func controlledInputDidBlur(_ input: RNControlledInput)
 }
 
 @objc(RNControlledInput)
@@ -63,6 +65,14 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
         ])
 
         applyFont()
+    }
+
+    public func textFieldDidBeginEditing(_ textField: UITextField) {
+        delegate?.controlledInputDidFocus(self)
+    }
+
+    public func textFieldDidEndEditing(_ textField: UITextField) {
+        delegate?.controlledInputDidBlur(self)
     }
 
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {

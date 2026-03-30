@@ -101,4 +101,24 @@ using namespace facebook::react;
     });
 }
 
+- (void)controlledInputDidFocus:(RNControlledInput *)input
+{
+    if (_eventEmitter == nullptr) {
+        return;
+    }
+
+    const auto eventEmitter = std::static_pointer_cast<const ControlledInputViewEventEmitter>(_eventEmitter);
+    eventEmitter->onFocus(ControlledInputViewEventEmitter::OnFocus {});
+}
+
+- (void)controlledInputDidBlur:(RNControlledInput *)input
+{
+    if (_eventEmitter == nullptr) {
+        return;
+    }
+
+    const auto eventEmitter = std::static_pointer_cast<const ControlledInputViewEventEmitter>(_eventEmitter);
+    eventEmitter->onBlur(ControlledInputViewEventEmitter::OnBlur {});
+}
+
 @end
