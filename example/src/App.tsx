@@ -15,7 +15,6 @@ export default function App() {
   };
 
   const handleFocus = (): void => {
-    console.log('handleFocus');
     setIsFocused(true);
   };
 
