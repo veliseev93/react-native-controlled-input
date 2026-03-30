@@ -7,56 +7,66 @@ import {
 
 export default function App() {
   const [value, setValue] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<ControlledInputViewRef>(null);
 
+  const handleValueChange = (text: string): void => {
+    setValue(text.replace(/\d/g, ''));
+  };
+
+  const handleFocus = (): void => {
+    console.log('handleFocus');
+    setIsFocused(true);
+  };
+
+  const handleBlur = (): void => {
+    setIsFocused(false);
+  };
+
+  const focus = (): void => {
+    inputRef.current?.focus();
+  };
+
+  const blur = (): void => {
+    inputRef.current?.blur();
+  };
+
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
-      onTouchStart={() => inputRef.current?.blur()}
-    >
+    <ScrollView contentContainerStyle={styles.container} onTouchStart={blur}>
       <ControlledInputView
         value={value}
         ref={inputRef}
-        onTextChange={(event) => {
-          setValue(event.nativeEvent.value.replace(/\d/g, ''));
-        }}
-        style={styles.box}
-        inputStyle={styles.textInput}
-        onFocus={() => {
-          console.log('onFocus');
-        }}
-        onBlur={() => {
-          console.log('onBlur');
-        }}
+        onTextChange={handleValueChange}
+        style={[styles.input, isFocused && styles.focusedInput]}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
       />
-      <Button title="Focus" onPress={() => inputRef.current?.focus()} />
+      <Button title="Focus" onPress={focus} />
+      <Button title="Blur" onPress={blur} />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingTop: 250,
     backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    flex: 1,
+    gap: 20,
   },
-  box: {
-    maxWidth: '100%',
-    height: 46,
-    marginVertical: 20,
-    marginHorizontal: 10,
-  },
-  textInput: {
-    color: 'red',
-    fontSize: 21,
-    height: 46,
-    paddingTop: 10,
-    paddingBottom: 10,
-    paddingLeft: 10,
-    paddingRight: 10,
+  input: {
+    height: 48,
+    marginHorizontal: 20,
     borderWidth: 1,
-    borderColor: 'red',
-    borderRadius: 10,
+    borderColor: '#F7F8FA',
+    borderRadius: 8,
+    fontSize: 16,
+    backgroundColor: '#F7F8FA',
+    paddingHorizontal: 10,
+    color: '#000000',
+    fontFamily: 'AlbertSans-Regular',
+  },
+  focusedInput: {
+    borderColor: '#167BF1',
   },
 });

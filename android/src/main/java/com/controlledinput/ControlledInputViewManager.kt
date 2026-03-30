@@ -47,7 +47,6 @@ class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
         color = if (inputStyle.hasKey("color")) inputStyle.getString("color") else null,
         fontSize = if (inputStyle.hasKey("fontSize")) inputStyle.getDouble("fontSize") else null,
         fontFamily = if (inputStyle.hasKey("fontFamily")) inputStyle.getString("fontFamily") else null,
-        height = if (inputStyle.hasKey("height")) inputStyle.getDouble("height") else null,
         paddingTop = if (inputStyle.hasKey("paddingTop")) inputStyle.getDouble("paddingTop") else null,
         paddingBottom = if (inputStyle.hasKey("paddingBottom")) inputStyle.getDouble("paddingBottom") else null,
         paddingLeft = if (inputStyle.hasKey("paddingLeft")) inputStyle.getDouble("paddingLeft") else null,
@@ -55,6 +54,7 @@ class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
         borderWidth = if (inputStyle.hasKey("borderWidth")) inputStyle.getDouble("borderWidth") else null,
         borderRadius = if (inputStyle.hasKey("borderRadius")) inputStyle.getDouble("borderRadius") else null,
         borderColor = if (inputStyle.hasKey("borderColor")) inputStyle.getString("borderColor") else null,
+        backgroundColor = if (inputStyle.hasKey("backgroundColor")) inputStyle.getString("backgroundColor") else null,
       )
     }
     view.viewModel.setInputStyle(style)

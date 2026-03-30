@@ -26,14 +26,14 @@ interface InputStyle {
   color?: ColorValue;
   fontSize?: Double;
   fontFamily?: string;
-  height?: Double;
   paddingTop?: Double;
   paddingBottom?: Double;
   paddingLeft?: Double;
   paddingRight?: Double;
   borderWidth?: Double;
   borderRadius?: Double;
-  borderColor?: ColorValue;
+  borderColor?: string;
+  backgroundColor?: string;
 }
 
 export interface NativeProps extends ViewProps {

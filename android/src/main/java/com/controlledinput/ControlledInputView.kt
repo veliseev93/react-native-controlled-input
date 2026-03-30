@@ -56,17 +56,19 @@ class ControlledInputView : LinearLayout {
   }
 
   private fun configureComponent(context: Context) {
+    setBackgroundColor(android.graphics.Color.TRANSPARENT)
 
     layoutParams = LayoutParams(
-      LayoutParams.WRAP_CONTENT,
-      LayoutParams.WRAP_CONTENT
+      LayoutParams.MATCH_PARENT,
+      LayoutParams.MATCH_PARENT
     )
 
     ComposeView(context).also {
       it.layoutParams = LayoutParams(
-        LayoutParams.WRAP_CONTENT,
-        LayoutParams.WRAP_CONTENT
+        LayoutParams.MATCH_PARENT,
+        LayoutParams.MATCH_PARENT
       )
+      it.setBackgroundColor(android.graphics.Color.TRANSPARENT)
 
       viewModel = JetpackComposeViewModel()
 

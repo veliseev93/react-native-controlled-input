@@ -52,43 +52,19 @@ using namespace facebook::react;
         _inputView.value = [NSString stringWithUTF8String:newViewProps.value.c_str()];
     }
 
-    // Update inputStyle props
     const auto &style = newViewProps.inputStyle;
     const auto &oldStyle = oldViewProps.inputStyle;
 
     if (oldStyle.color != style.color) {
         _inputView.textColor = RCTUIColorFromSharedColor(style.color);
     }
-    
+
     if (oldStyle.fontSize != style.fontSize) {
         _inputView.fontSize = style.fontSize;
     }
-    
+
     if (oldStyle.fontFamily != style.fontFamily) {
         _inputView.fontFamily = style.fontFamily.empty() ? nil : [NSString stringWithUTF8String:style.fontFamily.c_str()];
-    }
-    
-    if (oldStyle.height != style.height) {
-        _inputView.inputHeight = style.height;
-    }
-    
-    if (oldStyle.paddingTop != style.paddingTop || 
-        oldStyle.paddingBottom != style.paddingBottom ||
-        oldStyle.paddingLeft != style.paddingLeft ||
-        oldStyle.paddingRight != style.paddingRight) {
-        _inputView.padding = UIEdgeInsetsMake(style.paddingTop, style.paddingLeft, style.paddingBottom, style.paddingRight);
-    }
-    
-    if (oldStyle.borderWidth != style.borderWidth) {
-        _inputView.borderWidth = style.borderWidth;
-    }
-    
-    if (oldStyle.borderRadius != style.borderRadius) {
-        _inputView.borderRadius = style.borderRadius;
-    }
-    
-    if (oldStyle.borderColor != style.borderColor) {
-        _inputView.borderColor = RCTUIColorFromSharedColor(style.borderColor);
     }
 
     [super updateProps:props oldProps:oldProps];

@@ -30,26 +30,6 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
         didSet { applyFont() }
     }
 
-    @objc public var inputHeight: CGFloat = 0 {
-        didSet { invalidateIntrinsicContentSize() }
-    }
-
-    @objc public var padding: UIEdgeInsets = .zero {
-        didSet { applyPadding() }
-    }
-
-    @objc public var borderWidth: CGFloat = 0 {
-        didSet { layer.borderWidth = borderWidth }
-    }
-
-    @objc public var borderRadius: CGFloat = 0 {
-        didSet { layer.cornerRadius = borderRadius }
-    }
-
-    @objc public var borderColor: UIColor? {
-        didSet { layer.borderColor = borderColor?.cgColor }
-    }
-
     public override var canBecomeFirstResponder: Bool { true }
 
     @objc public func focus() {
@@ -101,20 +81,5 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
         } else {
             textField.font = UIFont.systemFont(ofSize: fontSize)
         }
-    }
-
-    private func applyPadding() {
-        // UITextField doesn't have built-in edge insets — wrap with container views
-        let leftView = UIView(frame: CGRect(x: 0, y: 0, width: padding.left, height: 1))
-        let rightView = UIView(frame: CGRect(x: 0, y: 0, width: padding.right, height: 1))
-        textField.leftView = leftView
-        textField.leftViewMode = .always
-        textField.rightView = rightView
-        textField.rightViewMode = .always
-    }
-
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-        layer.borderColor = borderColor?.cgColor
     }
 }

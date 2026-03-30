@@ -1,15 +1,15 @@
 package com.controlledinput
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Box
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.byValue
@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.facebook.react.bridge.Arguments
@@ -42,7 +41,6 @@ data class InputStyle(
   val color: String? = null,
   val fontSize: Double? = null,
   val fontFamily: String? = null,
-  val height: Double? = null,
   val paddingTop: Double? = null,
   val paddingBottom: Double? = null,
   val paddingLeft: Double? = null,
@@ -50,6 +48,7 @@ data class InputStyle(
   val borderWidth: Double? = null,
   val borderRadius: Double? = null,
   val borderColor: String? = null,
+  val backgroundColor: String? = null,
 )
 
 @Composable
@@ -96,23 +95,27 @@ fun JetpackComposeView(
       }
     }
   }
-  val height = style?.height?.let { it.dp }
-  val paddingValues = PaddingValues(
-    start = style?.paddingLeft?.dp ?: 0.dp,
-    top = style?.paddingTop?.dp ?: 0.dp,
-    end = style?.paddingRight?.dp ?: 0.dp,
-    bottom = style?.paddingBottom?.dp ?: 0.dp,
-  )
+
+  val paddingTop = style?.paddingTop?.dp ?: 0.dp
+  val paddingBottom = style?.paddingBottom?.dp ?: 0.dp
+  val paddingLeft = style?.paddingLeft?.dp ?: 0.dp
+  val paddingRight = style?.paddingRight?.dp ?: 0.dp
   val borderWidth = style?.borderWidth?.dp ?: 0.dp
   val borderRadius = style?.borderRadius?.dp ?: 0.dp
-  val borderColor = style?.borderColor?.let { Color(android.graphics.Color.parseColor(it)) } ?: Color.Transparent
+  val borderColor = style?.borderColor
+    ?.let { Color(android.graphics.Color.parseColor(it)) }
+    ?: Color.Transparent
+  val backgroundColor = style?.backgroundColor
+    ?.let { Color(android.graphics.Color.parseColor(it)) }
+    ?: Color.Transparent
+  val shape = RoundedCornerShape(borderRadius)
 
   Box(
     modifier = Modifier
-      .fillMaxWidth()
-      .then(height?.let { Modifier.height(it) } ?: Modifier)
-      .clip(RoundedCornerShape(borderRadius))
-      .border(borderWidth, borderColor, RoundedCornerShape(borderRadius))
+      .fillMaxSize()
+      .clip(shape)
+      .background(backgroundColor)
+      .border(borderWidth, borderColor, shape),
   ) {
     BasicTextField(
       state,
@@ -121,8 +124,13 @@ fun JetpackComposeView(
         proposed
       },
       modifier = Modifier
-        .fillMaxWidth()
-        .padding(paddingValues)
+        .fillMaxSize()
+        .padding(
+          start = paddingLeft,
+          top = paddingTop,
+          end = paddingRight,
+          bottom = paddingBottom,
+        )
         .focusRequester(focusRequester),
       textStyle = TextStyle(
         color = textColor,
@@ -130,6 +138,14 @@ fun JetpackComposeView(
         fontFamily = fontFamily,
       ),
       interactionSource = interactionSource,
+      decorator = { innerTextField ->
+        Box(
+          modifier = Modifier.fillMaxSize(),
+          contentAlignment = Alignment.CenterStart,
+        ) {
+          innerTextField()
+        }
+      },
     )
   }
 }
