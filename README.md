@@ -1,6 +1,6 @@
 # react-native-controlled-input
 
-A controlled React Native input for cases where regular `TextInput` can briefly show invalid characters before your filtered `value` is rendered back from JS.
+A controlled React Native input that lets you format and constrain the value exactly how you want in JS, while keeping the displayed text in sync without invalid characters flashing in the field.
 
 ## Problem
 
