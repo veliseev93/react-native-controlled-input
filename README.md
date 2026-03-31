@@ -68,13 +68,15 @@ inputRef.current?.blur();
 |------|------|-------------|
 | `value` | `string` | Current input value. |
 | `onTextChange` | `(value: string) => void` | Called with the next text value. Filter it and update `value`. |
-| `onFocus` | `() => void` | Called on focus. |
-| `onBlur` | `() => void` | Called on blur. |
-| `style` | `StyleProp<ViewStyle>` | Input styles. Same public API on iOS and Android, with platform-specific internal handling. |
+| `onFocus` | `() => void` | Called when the text input is focused. |
+| `onBlur` | `() => void` | Called when the text input is blurred. |
 | `autoComplete` | `string` | Specifies autocomplete hints for the system. Same as React Native [`TextInput`](https://reactnative.dev/docs/textinput#autocomplete). |
 | `autoCapitalize` | `string` | Can be `none`, `sentences`, `words`, `characters`. Same as React Native [`TextInput`](https://reactnative.dev/docs/textinput#autocapitalize). |
 | `keyboardType` | `string` | Determines which keyboard to open, e.g. `numeric`. Same as React Native [`TextInput`](https://reactnative.dev/docs/textinput#keyboardtype). |
 | `returnKeyType` | `string` | Determines how the return key should look. Same as React Native [`TextInput`](https://reactnative.dev/docs/textinput#returnkeytype). |
+| `placeholder` | `string` | The string that will be rendered before text input has been entered. |
+| `placeholderTextColor` | `ColorValue` | The text color of the placeholder string. |
+| `selectionColor` | `ColorValue` | The highlight and cursor color of the text input. |
 
 ## Style support
 
