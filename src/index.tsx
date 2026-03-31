@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  memo,
   useImperativeHandle,
   useRef,
   type ElementRef,
@@ -9,10 +10,12 @@ import {
   processColor,
   StyleSheet,
   type ViewStyle,
+  type TextStyle,
 } from 'react-native';
 import ControlledInputViewNativeComponent, {
   Commands,
   type NativeProps,
+  type TextChangeEvent,
 } from './ControlledInputViewNativeComponent';
 
 export interface ControlledInputViewRef {
@@ -28,7 +31,7 @@ export type ControlledInputViewProps = Omit<
 };
 
 // All style props that Android handles via Compose instead of the native View layer
-const ANDROID_HANDLED_KEYS = [
+const androidComposeHandledKeys = [
   'color',
   'fontSize',
   'fontFamily',
@@ -39,98 +42,108 @@ const ANDROID_HANDLED_KEYS = [
   'paddingBottom',
   'paddingLeft',
   'paddingRight',
-  'paddingStart',
-  'paddingEnd',
   'borderWidth',
   'borderRadius',
   'borderColor',
   'backgroundColor',
 ];
 
-function resolveAndroidPadding(flat: Record<string, any>) {
-  const base = flat.padding ?? 0;
+function resolveAndroidComposeViewPadding(flat: Record<string, any>) {
+  const padding = flat.padding ?? 0;
+
   return {
-    paddingTop: flat.paddingTop ?? flat.paddingVertical ?? base,
-    paddingBottom: flat.paddingBottom ?? flat.paddingVertical ?? base,
-    paddingLeft:
-      flat.paddingLeft ?? flat.paddingStart ?? flat.paddingHorizontal ?? base,
-    paddingRight:
-      flat.paddingRight ?? flat.paddingEnd ?? flat.paddingHorizontal ?? base,
+    paddingTop: flat.paddingTop ?? flat.paddingVertical ?? padding,
+    paddingBottom: flat.paddingBottom ?? flat.paddingVertical ?? padding,
+    paddingLeft: flat.paddingLeft ?? flat.paddingHorizontal ?? padding,
+    paddingRight: flat.paddingRight ?? flat.paddingHorizontal ?? padding,
   };
 }
 
-export const ControlledInputView = forwardRef<
-  ControlledInputViewRef,
-  ControlledInputViewProps
->(({ style, onTextChange, ...rest }, ref) => {
-  const nativeRef =
-    useRef<ElementRef<typeof ControlledInputViewNativeComponent>>(null);
+export const ControlledInputView = memo(
+  forwardRef<ControlledInputViewRef, ControlledInputViewProps>(
+    ({ style, onTextChange, ...rest }, ref) => {
+      const nativeRef =
+        useRef<ElementRef<typeof ControlledInputViewNativeComponent>>(null);
 
-  const flat = (StyleSheet.flatten(style) ?? {}) as Record<string, any>;
+      const flattenedStyle = (StyleSheet.flatten(style) ?? {}) as TextStyle;
 
-  let viewStyle: ViewStyle;
-  let inputStyle: Record<string, any> | undefined;
+      let viewStyle: ViewStyle;
+      let inputStyle: Record<string, any> | undefined;
 
-  if (Platform.OS === 'android') {
-    viewStyle = Object.fromEntries(
-      Object.entries(flat).filter(([k]) => !ANDROID_HANDLED_KEYS.includes(k))
-    ) as ViewStyle;
+      if (Platform.OS === 'android') {
+        viewStyle = Object.fromEntries(
+          Object.entries(flattenedStyle).filter(
+            ([k]) => !androidComposeHandledKeys.includes(k)
+          )
+        );
 
-    const hasPadding = ANDROID_HANDLED_KEYS.slice(3, 12).some(
-      (k) => flat[k] != null
-    );
+        const hasPadding = Object.entries(flattenedStyle).some(
+          ([k, v]) => k.includes('padding') && v != null
+        );
 
-    inputStyle = {
-      color: flat.color,
-      fontSize: flat.fontSize,
-      fontFamily: flat.fontFamily,
-      ...(hasPadding ? resolveAndroidPadding(flat) : {}),
-      borderWidth: flat.borderWidth,
-      borderRadius: flat.borderRadius,
-      borderColor: flat.borderColor,
-      backgroundColor: flat.backgroundColor,
-    };
-  } else {
-    const { color, fontSize, fontFamily, ...iosRest } = flat;
-    viewStyle = iosRest as ViewStyle;
+        inputStyle = {
+          color: flattenedStyle.color,
+          fontSize: flattenedStyle.fontSize,
+          fontFamily: flattenedStyle.fontFamily,
+          ...(hasPadding
+            ? resolveAndroidComposeViewPadding(flattenedStyle)
+            : {}),
+          borderWidth: flattenedStyle.borderWidth,
+          borderRadius: flattenedStyle.borderRadius,
+          borderColor: flattenedStyle.borderColor,
+          backgroundColor: flattenedStyle.backgroundColor,
+        };
+      } else {
+        const { color, fontSize, fontFamily, ...iosViewStyle } = flattenedStyle;
+        viewStyle = iosViewStyle;
 
-    const hasTextStyle =
-      color != null || fontSize != null || fontFamily != null;
-    inputStyle = hasTextStyle
-      ? {
-          color: color != null ? processColor(color) : undefined,
-          fontSize,
-          fontFamily,
+        const hasTextStyle =
+          color != null || fontSize != null || fontFamily != null;
+        inputStyle = hasTextStyle
+          ? {
+              color: color != null ? processColor(color) : undefined,
+              fontSize,
+              fontFamily,
+            }
+          : undefined;
+      }
+
+      const handleTextChange = (e: {
+        nativeEvent: Readonly<TextChangeEvent>;
+      }) => {
+        if (onTextChange) {
+          onTextChange(e.nativeEvent.value);
         }
-      : undefined;
-  }
+      };
 
-  useImperativeHandle(ref, () => ({
-    blur: () => {
-      if (!nativeRef.current) return;
-      if (Platform.OS === 'ios' || Platform.OS === 'android') {
-        Commands.blur(nativeRef.current);
-      }
-    },
-    focus: () => {
-      if (!nativeRef.current) return;
-      if (Platform.OS === 'ios' || Platform.OS === 'android') {
-        Commands.focus(nativeRef.current);
-      }
-    },
-  }));
+      useImperativeHandle(ref, () => ({
+        blur: () => {
+          if (!nativeRef.current) return;
+          if (Platform.OS === 'ios' || Platform.OS === 'android') {
+            Commands.blur(nativeRef.current);
+          }
+        },
+        focus: () => {
+          if (!nativeRef.current) return;
+          if (Platform.OS === 'ios' || Platform.OS === 'android') {
+            Commands.focus(nativeRef.current);
+          }
+        },
+      }));
 
-  return (
-    <ControlledInputViewNativeComponent
-      {...rest}
-      style={viewStyle}
-      inputStyle={inputStyle as NativeProps['inputStyle']}
-      onTextChange={
-        onTextChange ? (e) => onTextChange(e.nativeEvent.value) : undefined
-      }
-      ref={nativeRef as any}
-    />
-  );
-});
+      return (
+        <ControlledInputViewNativeComponent
+          {...rest}
+          style={viewStyle}
+          inputStyle={inputStyle}
+          onTextChange={handleTextChange}
+          ref={nativeRef}
+        />
+      );
+    }
+  )
+);
+
+ControlledInputView.displayName = 'ControlledInputView';
 
 export * from './ControlledInputViewNativeComponent';

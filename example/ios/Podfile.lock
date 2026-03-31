@@ -1,6 +1,6 @@
 PODS:
   - boost (1.84.0)
-  - ControlledInput (0.8.0):
+  - ControlledInput (0.9.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2727,7 +2727,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
-  ControlledInput: 5403df2d7c2d7bdb60093d1e6c812488dd5b55ea
+  ControlledInput: eea058de326dbcb513a4da7a82405644ad5d7cec
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
   FBLazyVector: a293a88992c4c33f0aee184acab0b64a08ff9458

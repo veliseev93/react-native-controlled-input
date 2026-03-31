@@ -1,28 +1,28 @@
 import {
   codegenNativeComponent,
-  type ViewProps,
   type ColorValue,
   type HostComponent,
+  type ViewProps,
 } from 'react-native';
-import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
+import { codegenNativeCommands } from 'react-native';
 import type {
   BubblingEventHandler,
   Double,
 } from 'react-native/Libraries/Types/CodegenTypes';
 
-interface TextChangeEvent {
+export interface TextChangeEvent {
   value: string;
 }
 
-interface FocusEvent {
+export interface FocusEvent {
   // Empty event
 }
 
-interface BlurEvent {
+export interface BlurEvent {
   // Empty event
 }
 
-interface InputStyle {
+export interface InputStyle {
   color?: ColorValue;
   fontSize?: Double;
   fontFamily?: string;
