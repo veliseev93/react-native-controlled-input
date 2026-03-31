@@ -9,6 +9,7 @@ import {
   Platform,
   processColor,
   StyleSheet,
+  type TextInputProps,
   type ViewStyle,
   type TextStyle,
 } from 'react-native';
@@ -23,12 +24,18 @@ export interface ControlledInputViewRef {
   focus: () => void;
 }
 
+type ForwardedTextInputProps = Pick<
+  TextInputProps,
+  'autoComplete' | 'keyboardType' | 'returnKeyType'
+>;
+
 export type ControlledInputViewProps = Omit<
   NativeProps,
-  'inputStyle' | 'onTextChange'
-> & {
-  onTextChange?: (value: string) => void;
-};
+  'inputStyle' | 'onTextChange' | keyof ForwardedTextInputProps
+> &
+  ForwardedTextInputProps & {
+    onTextChange?: (value: string) => void;
+  };
 
 // All style props that Android handles via Compose instead of the native View layer
 const androidComposeHandledKeys = [

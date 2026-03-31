@@ -2,6 +2,7 @@ package com.controlledinput
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -29,6 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.facebook.react.bridge.Arguments
@@ -55,6 +58,8 @@ data class InputStyle(
 fun JetpackComposeView(
   value: String,
   inputStyle: StateFlow<InputStyle?>,
+  keyboardType: StateFlow<String?>,
+  returnKeyType: StateFlow<String?>,
   onTextChange: (value: String) -> Unit,
   onFocus: (() -> Unit)? = null,
   onBlur: (() -> Unit)? = null,
@@ -62,6 +67,8 @@ fun JetpackComposeView(
 ) {
   val state = remember { TextFieldState(value) }
   val style by inputStyle.collectAsState()
+  val keyboardTypeValue by keyboardType.collectAsState()
+  val returnKeyTypeValue by returnKeyType.collectAsState()
   val interactionSource = remember { MutableInteractionSource() }
 
   if (state.text.toString() != value) {
@@ -137,6 +144,10 @@ fun JetpackComposeView(
         fontSize = fontSize,
         fontFamily = fontFamily,
       ),
+      keyboardOptions = KeyboardOptions(
+        keyboardType = toComposeKeyboardType(keyboardTypeValue),
+        imeAction = toComposeImeAction(returnKeyTypeValue),
+      ),
       interactionSource = interactionSource,
       decorator = { innerTextField ->
         Box(
@@ -148,6 +159,29 @@ fun JetpackComposeView(
       },
     )
   }
+}
+
+private fun toComposeKeyboardType(value: String?): KeyboardType = when (value) {
+  "ascii-capable" -> KeyboardType.Ascii
+  "numbers-and-punctuation" -> KeyboardType.Text
+  "url" -> KeyboardType.Uri
+  "number-pad", "numeric" -> KeyboardType.Number
+  "phone-pad" -> KeyboardType.Phone
+  "email-address" -> KeyboardType.Email
+  "decimal-pad" -> KeyboardType.Decimal
+  "visible-password" -> KeyboardType.Password
+  else -> KeyboardType.Text
+}
+
+private fun toComposeImeAction(value: String?): ImeAction = when (value) {
+  "go" -> ImeAction.Go
+  "next" -> ImeAction.Next
+  "search" -> ImeAction.Search
+  "send" -> ImeAction.Send
+  "done" -> ImeAction.Done
+  "none" -> ImeAction.None
+  "previous" -> ImeAction.Previous
+  else -> ImeAction.Default
 }
 
 class TextChangeEvent(
@@ -203,9 +237,15 @@ class BlurEvent(
 class JetpackComposeViewModel : ViewModel() {
   private val _value = MutableStateFlow("")
   private val _inputStyle = MutableStateFlow<InputStyle?>(null)
+  private val _autoComplete = MutableStateFlow<String?>(null)
+  private val _keyboardType = MutableStateFlow<String?>(null)
+  private val _returnKeyType = MutableStateFlow<String?>(null)
 
   val value: StateFlow<String> get() = _value
   val inputStyle: StateFlow<InputStyle?> get() = _inputStyle
+  val autoComplete: StateFlow<String?> get() = _autoComplete
+  val keyboardType: StateFlow<String?> get() = _keyboardType
+  val returnKeyType: StateFlow<String?> get() = _returnKeyType
 
   fun setValue(newValue: String) {
     _value.value = newValue
@@ -213,5 +253,17 @@ class JetpackComposeViewModel : ViewModel() {
 
   fun setInputStyle(style: InputStyle?) {
     _inputStyle.value = style
+  }
+
+  fun setAutoComplete(value: String?) {
+    _autoComplete.value = value
+  }
+
+  fun setKeyboardType(value: String?) {
+    _keyboardType.value = value
+  }
+
+  fun setReturnKeyType(value: String?) {
+    _returnKeyType.value = value
   }
 }

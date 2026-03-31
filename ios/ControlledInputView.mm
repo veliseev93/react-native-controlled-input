@@ -52,6 +52,18 @@ using namespace facebook::react;
         _inputView.value = [NSString stringWithUTF8String:newViewProps.value.c_str()];
     }
 
+    if (oldViewProps.autoComplete != newViewProps.autoComplete) {
+        _inputView.autoComplete = newViewProps.autoComplete.empty() ? nil : [NSString stringWithUTF8String:newViewProps.autoComplete.c_str()];
+    }
+
+    if (oldViewProps.keyboardType != newViewProps.keyboardType) {
+        _inputView.keyboardType = newViewProps.keyboardType.empty() ? nil : [NSString stringWithUTF8String:newViewProps.keyboardType.c_str()];
+    }
+
+    if (oldViewProps.returnKeyType != newViewProps.returnKeyType) {
+        _inputView.returnKeyType = newViewProps.returnKeyType.empty() ? nil : [NSString stringWithUTF8String:newViewProps.returnKeyType.c_str()];
+    }
+
     const auto &style = newViewProps.inputStyle;
     const auto &oldStyle = oldViewProps.inputStyle;
 

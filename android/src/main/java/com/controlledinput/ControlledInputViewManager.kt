@@ -38,6 +38,21 @@ class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
     }
   }
 
+  @ReactProp(name = "autoComplete")
+  override fun setAutoComplete(view: ControlledInputView, autoComplete: String?) {
+    view.setAutoComplete(autoComplete)
+  }
+
+  @ReactProp(name = "keyboardType")
+  override fun setKeyboardType(view: ControlledInputView, keyboardType: String?) {
+    view.setKeyboardType(keyboardType)
+  }
+
+  @ReactProp(name = "returnKeyType")
+  override fun setReturnKeyType(view: ControlledInputView, returnKeyType: String?) {
+    view.setReturnKeyType(returnKeyType)
+  }
+
   @ReactProp(name = "inputStyle")
   override fun setInputStyle(view: ControlledInputView, inputStyle: ReadableMap?) {
     val style = if (inputStyle == null) {

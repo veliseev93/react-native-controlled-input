@@ -32,6 +32,18 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
         didSet { applyFont() }
     }
 
+    @objc public var autoComplete: String? {
+        didSet { applyAutoComplete() }
+    }
+
+    @objc public var keyboardType: String? {
+        didSet { applyKeyboardType() }
+    }
+
+    @objc public var returnKeyType: String? {
+        didSet { applyReturnKeyType() }
+    }
+
     public override var canBecomeFirstResponder: Bool { true }
 
     @objc public func focus() {
@@ -65,6 +77,9 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
         ])
 
         applyFont()
+        applyAutoComplete()
+        applyKeyboardType()
+        applyReturnKeyType()
     }
 
     public func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -90,6 +105,132 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
             textField.font = font
         } else {
             textField.font = UIFont.systemFont(ofSize: fontSize)
+        }
+    }
+
+    private func applyAutoComplete() {
+        guard let autoComplete else {
+            textField.textContentType = nil
+            return
+        }
+
+        if autoComplete == "off" || autoComplete.isEmpty {
+            textField.textContentType = nil
+            return
+        }
+
+        let mappedValue: String
+        switch autoComplete {
+        case "email":
+            mappedValue = "emailAddress"
+        case "tel":
+            mappedValue = "telephoneNumber"
+        case "name":
+            mappedValue = "name"
+        case "given-name":
+            mappedValue = "givenName"
+        case "middle-name":
+            mappedValue = "middleName"
+        case "family-name":
+            mappedValue = "familyName"
+        case "username":
+            mappedValue = "username"
+        case "password":
+            mappedValue = "password"
+        case "new-password":
+            mappedValue = "newPassword"
+        case "one-time-code":
+            mappedValue = "oneTimeCode"
+        case "postal-code":
+            mappedValue = "postalCode"
+        case "street-address":
+            mappedValue = "fullStreetAddress"
+        case "country":
+            mappedValue = "countryName"
+        case "cc-number":
+            mappedValue = "creditCardNumber"
+        case "cc-csc":
+            mappedValue = "creditCardSecurityCode"
+        case "cc-exp":
+            mappedValue = "creditCardExpiration"
+        case "cc-exp-month":
+            mappedValue = "creditCardExpirationMonth"
+        case "cc-exp-year":
+            mappedValue = "creditCardExpirationYear"
+        case "birthdate-day":
+            mappedValue = "birthdateDay"
+        case "birthdate-month":
+            mappedValue = "birthdateMonth"
+        case "birthdate-year":
+            mappedValue = "birthdateYear"
+        case "url":
+            mappedValue = "URL"
+        default:
+            mappedValue = autoComplete
+        }
+
+        textField.textContentType = UITextContentType(rawValue: mappedValue)
+    }
+
+    private func applyKeyboardType() {
+        switch keyboardType {
+        case "ascii-capable":
+            textField.keyboardType = .asciiCapable
+        case "numbers-and-punctuation":
+            textField.keyboardType = .numbersAndPunctuation
+        case "url":
+            textField.keyboardType = .URL
+        case "number-pad":
+            textField.keyboardType = .numberPad
+        case "phone-pad":
+            textField.keyboardType = .phonePad
+        case "name-phone-pad":
+            textField.keyboardType = .namePhonePad
+        case "email-address":
+            textField.keyboardType = .emailAddress
+        case "decimal-pad":
+            textField.keyboardType = .decimalPad
+        case "twitter":
+            textField.keyboardType = .twitter
+        case "web-search":
+            textField.keyboardType = .webSearch
+        case "visible-password":
+            textField.keyboardType = .asciiCapable
+        case "numeric":
+            textField.keyboardType = .numbersAndPunctuation
+        default:
+            textField.keyboardType = .default
+        }
+    }
+
+    private func applyReturnKeyType() {
+        switch returnKeyType {
+        case "done":
+            textField.returnKeyType = .done
+        case "go":
+            textField.returnKeyType = .go
+        case "next":
+            textField.returnKeyType = .next
+        case "search":
+            textField.returnKeyType = .search
+        case "send":
+            textField.returnKeyType = .send
+        case "none":
+            textField.returnKeyType = .default
+        case "previous":
+            textField.returnKeyType = .default
+        case "route":
+            textField.returnKeyType = .route
+        case "yahoo":
+            textField.returnKeyType = .yahoo
+        case "emergency-call":
+            textField.returnKeyType = .emergencyCall
+        case "google":
+            textField.returnKeyType = .google
+        case "join":
+            textField.returnKeyType = .join
+        default:
+            textField.returnKeyType = .default
         }
     }
 }

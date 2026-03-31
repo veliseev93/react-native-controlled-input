@@ -38,6 +38,9 @@ export interface InputStyle {
 
 export interface NativeProps extends ViewProps {
   value?: string;
+  autoComplete?: string;
+  keyboardType?: string;
+  returnKeyType?: string;
   inputStyle?: InputStyle;
   onTextChange?: BubblingEventHandler<Readonly<TextChangeEvent>>;
   onFocus?: BubblingEventHandler<Readonly<FocusEvent>>;
