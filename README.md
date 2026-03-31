@@ -71,6 +71,10 @@ inputRef.current?.blur();
 | `onFocus` | `() => void` | Called on focus. |
 | `onBlur` | `() => void` | Called on blur. |
 | `style` | `StyleProp<ViewStyle>` | Input styles. Same public API on iOS and Android, with platform-specific internal handling. |
+| `autoComplete` | `string` | Specifies autocomplete hints for the system. Same as React Native [`TextInput`](https://reactnative.dev/docs/textinput#autocomplete). |
+| `autoCapitalize` | `string` | Can be `none`, `sentences`, `words`, `characters`. Same as React Native [`TextInput`](https://reactnative.dev/docs/textinput#autocapitalize). |
+| `keyboardType` | `string` | Determines which keyboard to open, e.g. `numeric`. Same as React Native [`TextInput`](https://reactnative.dev/docs/textinput#keyboardtype). |
+| `returnKeyType` | `string` | Determines how the return key should look. Same as React Native [`TextInput`](https://reactnative.dev/docs/textinput#returnkeytype). |
 
 ## Style support
 
