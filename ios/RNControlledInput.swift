@@ -97,6 +97,12 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
 
         delegate?.controlledInputDidChangeText(self, value: newText)
 
+        // If the replacement string is more than one character, it's likely an autocomplete/paste
+        // In this case, we should let the UITextField update itself to handle it correctly
+        if string.count > 1 {
+            return true
+        }
+
         return false
     }
 

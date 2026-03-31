@@ -32,12 +32,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.autofill.AutofillNode
+import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.platform.LocalAutofill
+import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.events.Event
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 data class InputStyle(
@@ -58,6 +62,7 @@ data class InputStyle(
 fun JetpackComposeView(
   value: String,
   inputStyle: StateFlow<InputStyle?>,
+  autoComplete: StateFlow<String?>,
   keyboardType: StateFlow<String?>,
   returnKeyType: StateFlow<String?>,
   onTextChange: (value: String) -> Unit,
@@ -69,7 +74,17 @@ fun JetpackComposeView(
   val style by inputStyle.collectAsState()
   val keyboardTypeValue by keyboardType.collectAsState()
   val returnKeyTypeValue by returnKeyType.collectAsState()
+  val autoCompleteValue by autoComplete.collectAsState()
   val interactionSource = remember { MutableInteractionSource() }
+
+  val autofill = LocalAutofill.current
+  val autofillNode = remember {
+    AutofillNode(
+      autofillTypes = toAutofillTypes(autoCompleteValue),
+      onFill = { onTextChange(it) }
+    )
+  }
+  LocalAutofillTree.current += autofillNode
 
   if (state.text.toString() != value) {
     state.setTextAndPlaceCursorAtEnd(value)
@@ -80,9 +95,11 @@ fun JetpackComposeView(
       when (interaction) {
         is FocusInteraction.Focus -> {
           onFocus?.invoke()
+          autofill?.requestAutofillForNode(autofillNode)
         }
         is FocusInteraction.Unfocus -> {
           onBlur?.invoke()
+          autofill?.cancelAutofillForNode(autofillNode)
         }
       }
     }
@@ -138,6 +155,9 @@ fun JetpackComposeView(
           end = paddingRight,
           bottom = paddingBottom,
         )
+        .onGloballyPositioned {
+          autofillNode.boundingBox = it.boundsInWindow()
+        }
         .focusRequester(focusRequester),
       textStyle = TextStyle(
         color = textColor,
@@ -182,6 +202,22 @@ private fun toComposeImeAction(value: String?): ImeAction = when (value) {
   "none" -> ImeAction.None
   "previous" -> ImeAction.Previous
   else -> ImeAction.Default
+}
+
+private fun toAutofillTypes(autoComplete: String?): List<AutofillType> = when (autoComplete) {
+  "email" -> listOf(AutofillType.EmailAddress)
+  "name", "given-name", "family-name", "additional-name" -> listOf(AutofillType.PersonFullName)
+  "username" -> listOf(AutofillType.Username)
+  "password", "new-password" -> listOf(AutofillType.Password)
+  "tel" -> listOf(AutofillType.PhoneNumber)
+  "postal-code" -> listOf(AutofillType.PostalCode)
+  "street-address" -> listOf(AutofillType.AddressStreet)
+  "cc-number" -> listOf(AutofillType.CreditCardNumber)
+  "cc-exp" -> listOf(AutofillType.CreditCardExpirationDate)
+  "cc-exp-month" -> listOf(AutofillType.CreditCardExpirationMonth)
+  "cc-exp-year" -> listOf(AutofillType.CreditCardExpirationYear)
+  "cc-csc" -> listOf(AutofillType.CreditCardSecurityCode)
+  else -> emptyList()
 }
 
 class TextChangeEvent(
@@ -230,40 +266,5 @@ class BlurEvent(
 
   companion object {
     const val EVENT_NAME = "onBlur"
-  }
-}
-
-
-class JetpackComposeViewModel : ViewModel() {
-  private val _value = MutableStateFlow("")
-  private val _inputStyle = MutableStateFlow<InputStyle?>(null)
-  private val _autoComplete = MutableStateFlow<String?>(null)
-  private val _keyboardType = MutableStateFlow<String?>(null)
-  private val _returnKeyType = MutableStateFlow<String?>(null)
-
-  val value: StateFlow<String> get() = _value
-  val inputStyle: StateFlow<InputStyle?> get() = _inputStyle
-  val autoComplete: StateFlow<String?> get() = _autoComplete
-  val keyboardType: StateFlow<String?> get() = _keyboardType
-  val returnKeyType: StateFlow<String?> get() = _returnKeyType
-
-  fun setValue(newValue: String) {
-    _value.value = newValue
-  }
-
-  fun setInputStyle(style: InputStyle?) {
-    _inputStyle.value = style
-  }
-
-  fun setAutoComplete(value: String?) {
-    _autoComplete.value = value
-  }
-
-  fun setKeyboardType(value: String?) {
-    _keyboardType.value = value
-  }
-
-  fun setReturnKeyType(value: String?) {
-    _returnKeyType.value = value
   }
 }

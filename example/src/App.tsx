@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { StyleSheet, ScrollView, Button } from 'react-native';
+import { StyleSheet, ScrollView, Button, TextInput } from 'react-native';
 import {
   ControlledInputView,
   type ControlledInputViewRef,
@@ -42,6 +42,8 @@ export default function App() {
       />
       <Button title="Focus" onPress={focus} />
       <Button title="Blur" onPress={blur} />
+
+      <TextInput autoComplete="additional-name" />
     </ScrollView>
   );
 }

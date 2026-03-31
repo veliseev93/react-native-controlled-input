@@ -40,17 +40,17 @@ class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
 
   @ReactProp(name = "autoComplete")
   override fun setAutoComplete(view: ControlledInputView, autoComplete: String?) {
-    view.setAutoComplete(autoComplete)
+    view.viewModel.setAutoCompleteWithAutofill(view, autoComplete)
   }
 
   @ReactProp(name = "keyboardType")
   override fun setKeyboardType(view: ControlledInputView, keyboardType: String?) {
-    view.setKeyboardType(keyboardType)
+    view.viewModel.setKeyboardType(keyboardType)
   }
 
   @ReactProp(name = "returnKeyType")
   override fun setReturnKeyType(view: ControlledInputView, returnKeyType: String?) {
-    view.setReturnKeyType(returnKeyType)
+    view.viewModel.setReturnKeyType(returnKeyType)
   }
 
   @ReactProp(name = "inputStyle")

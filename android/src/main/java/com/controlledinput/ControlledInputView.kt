@@ -1,13 +1,9 @@
 package com.controlledinput
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
-import android.view.View
 import android.util.AttributeSet
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
-import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,45 +35,6 @@ class ControlledInputView : LinearLayout {
   internal lateinit var viewModel: JetpackComposeViewModel
   private val blurSignal = MutableStateFlow(0)
   private val focusSignal = MutableStateFlow(0)
-
-  fun setAutoComplete(autoComplete: String?) {
-    viewModel.setAutoComplete(autoComplete)
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      val hint = when (autoComplete) {
-        "email" -> View.AUTOFILL_HINT_EMAIL_ADDRESS
-        "name" -> View.AUTOFILL_HINT_NAME
-        "given-name" -> View.AUTOFILL_HINT_NAME
-        "family-name" -> View.AUTOFILL_HINT_NAME
-        "username" -> View.AUTOFILL_HINT_USERNAME
-        "password", "new-password" -> View.AUTOFILL_HINT_PASSWORD
-        "tel" -> View.AUTOFILL_HINT_PHONE
-        "postal-code" -> View.AUTOFILL_HINT_POSTAL_CODE
-        "street-address" -> View.AUTOFILL_HINT_POSTAL_ADDRESS
-        "cc-number" -> View.AUTOFILL_HINT_CREDIT_CARD_NUMBER
-        "cc-exp" -> View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE
-        "cc-exp-month" -> View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH
-        "cc-exp-year" -> View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR
-        "cc-csc" -> View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE
-        else -> null
-      }
-
-      if (hint == null || autoComplete == "off" || autoComplete.isNullOrEmpty()) {
-        setAutofillHints(*emptyArray())
-      } else {
-        importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_YES
-        setAutofillHints(hint)
-      }
-    }
-  }
-
-  fun setKeyboardType(keyboardType: String?) {
-    viewModel.setKeyboardType(keyboardType)
-  }
-
-  fun setReturnKeyType(returnKeyType: String?) {
-    viewModel.setReturnKeyType(returnKeyType)
-  }
 
   fun blur() {
     // триггерим compose снять фокус
@@ -137,6 +94,7 @@ class ControlledInputView : LinearLayout {
         JetpackComposeView(
           value = value,
           inputStyle = viewModel.inputStyle,
+          autoComplete = viewModel.autoComplete,
           keyboardType = viewModel.keyboardType,
           returnKeyType = viewModel.returnKeyType,
           onTextChange = { value ->
