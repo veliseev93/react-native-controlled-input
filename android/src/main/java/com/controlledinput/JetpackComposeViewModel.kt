@@ -10,6 +10,7 @@ class JetpackComposeViewModel : ViewModel() {
   private val _value = MutableStateFlow("")
   private val _inputStyle = MutableStateFlow<InputStyle?>(null)
   private val _autoComplete = MutableStateFlow<String?>(null)
+  private val _placeholder = MutableStateFlow<String?>(null)
   private val _autoCapitalize = MutableStateFlow<String?>(null)
   private val _keyboardType = MutableStateFlow<String?>(null)
   private val _returnKeyType = MutableStateFlow<String?>(null)
@@ -17,6 +18,7 @@ class JetpackComposeViewModel : ViewModel() {
   val value: StateFlow<String> get() = _value
   val inputStyle: StateFlow<InputStyle?> get() = _inputStyle
   val autoComplete: StateFlow<String?> get() = _autoComplete
+  val placeholder: StateFlow<String?> get() = _placeholder
   val autoCapitalize: StateFlow<String?> get() = _autoCapitalize
   val keyboardType: StateFlow<String?> get() = _keyboardType
   val returnKeyType: StateFlow<String?> get() = _returnKeyType
@@ -31,6 +33,10 @@ class JetpackComposeViewModel : ViewModel() {
 
   fun setAutoComplete(newValue: String?) {
     _autoComplete.value = newValue
+  }
+
+  fun setPlaceholder(newValue: String?) {
+    _placeholder.value = newValue
   }
 
   fun setAutoCompleteWithAutofill(hostView: View, newValue: String?) {

@@ -26,7 +26,11 @@ export interface ControlledInputViewRef {
 
 type ForwardedTextInputProps = Pick<
   TextInputProps,
-  'autoComplete' | 'autoCapitalize' | 'keyboardType' | 'returnKeyType'
+  | 'autoComplete'
+  | 'autoCapitalize'
+  | 'keyboardType'
+  | 'returnKeyType'
+  | 'placeholder'
 >;
 
 export type ControlledInputViewProps = Omit<

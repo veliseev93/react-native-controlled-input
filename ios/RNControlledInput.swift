@@ -48,6 +48,10 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
         didSet { applyReturnKeyType() }
     }
 
+    @objc public var placeholder: String? {
+        didSet { textField.placeholder = placeholder }
+    }
+
     public override var canBecomeFirstResponder: Bool { true }
 
     @objc public func focus() {

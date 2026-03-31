@@ -35,6 +35,7 @@ export default function App() {
       <ControlledInputView
         value={value}
         ref={inputRef}
+        placeholder="Type something..."
         onTextChange={handleValueChange}
         style={[styles.input, isFocused && styles.focusedInput]}
         onFocus={handleFocus}

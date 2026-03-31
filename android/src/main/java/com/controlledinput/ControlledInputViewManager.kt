@@ -38,6 +38,11 @@ class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
     }
   }
 
+  @ReactProp(name = "placeholder")
+  override fun setPlaceholder(view: ControlledInputView, placeholder: String?) {
+    view.viewModel.setPlaceholder(placeholder)
+  }
+
   @ReactProp(name = "autoComplete")
   override fun setAutoComplete(view: ControlledInputView, autoComplete: String?) {
     view.viewModel.setAutoCompleteWithAutofill(view, autoComplete)

@@ -64,6 +64,7 @@ fun JetpackComposeView(
   value: String,
   inputStyle: StateFlow<InputStyle?>,
   autoComplete: StateFlow<String?>,
+  placeholder: StateFlow<String?>,
   autoCapitalize: StateFlow<String?>,
   keyboardType: StateFlow<String?>,
   returnKeyType: StateFlow<String?>,
@@ -78,6 +79,7 @@ fun JetpackComposeView(
   val autoCapitalizeValue by autoCapitalize.collectAsState()
   val returnKeyTypeValue by returnKeyType.collectAsState()
   val autoCompleteValue by autoComplete.collectAsState()
+  val placeholderValue by placeholder.collectAsState()
   val interactionSource = remember { MutableInteractionSource() }
 
   val autofill = LocalAutofill.current
@@ -178,6 +180,16 @@ fun JetpackComposeView(
           modifier = Modifier.fillMaxSize(),
           contentAlignment = Alignment.CenterStart,
         ) {
+          if (state.text.isEmpty() && !placeholderValue.isNullOrEmpty()) {
+            androidx.compose.material3.Text(
+              text = placeholderValue!!,
+              style = TextStyle(
+                color = textColor.copy(alpha = 0.5f),
+                fontSize = fontSize,
+                fontFamily = fontFamily,
+              )
+            )
+          }
           innerTextField()
         }
       },
