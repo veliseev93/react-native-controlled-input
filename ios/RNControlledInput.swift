@@ -36,6 +36,10 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
         didSet { applyAutoComplete() }
     }
 
+    @objc public var autoCapitalize: String? {
+        didSet { applyAutoCapitalize() }
+    }
+
     @objc public var keyboardType: String? {
         didSet { applyKeyboardType() }
     }
@@ -78,6 +82,7 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
 
         applyFont()
         applyAutoComplete()
+        applyAutoCapitalize()
         applyKeyboardType()
         applyReturnKeyType()
     }
@@ -176,6 +181,26 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
         }
 
         textField.textContentType = UITextContentType(rawValue: mappedValue)
+    }
+
+    private func applyAutoCapitalize() {
+        guard let autoCapitalize else {
+            textField.autocapitalizationType = .sentences
+            return
+        }
+
+        switch autoCapitalize {
+        case "none":
+            textField.autocapitalizationType = .none
+        case "words":
+            textField.autocapitalizationType = .words
+        case "sentences":
+            textField.autocapitalizationType = .sentences
+        case "characters":
+            textField.autocapitalizationType = .allCharacters
+        default:
+            textField.autocapitalizationType = .sentences
+        }
     }
 
     private func applyKeyboardType() {

@@ -64,6 +64,10 @@ using namespace facebook::react;
         _inputView.returnKeyType = newViewProps.returnKeyType.empty() ? nil : [NSString stringWithUTF8String:newViewProps.returnKeyType.c_str()];
     }
 
+    if (oldViewProps.autoCapitalize != newViewProps.autoCapitalize) {
+        _inputView.autoCapitalize = newViewProps.autoCapitalize.empty() ? nil : [NSString stringWithUTF8String:newViewProps.autoCapitalize.c_str()];
+    }
+
     const auto &style = newViewProps.inputStyle;
     const auto &oldStyle = oldViewProps.inputStyle;
 

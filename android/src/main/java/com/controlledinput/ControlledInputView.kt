@@ -95,6 +95,7 @@ class ControlledInputView : LinearLayout {
           value = value,
           inputStyle = viewModel.inputStyle,
           autoComplete = viewModel.autoComplete,
+          autoCapitalize = viewModel.autoCapitalize,
           keyboardType = viewModel.keyboardType,
           returnKeyType = viewModel.returnKeyType,
           onTextChange = { value ->

@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.autofill.AutofillType
@@ -63,6 +64,7 @@ fun JetpackComposeView(
   value: String,
   inputStyle: StateFlow<InputStyle?>,
   autoComplete: StateFlow<String?>,
+  autoCapitalize: StateFlow<String?>,
   keyboardType: StateFlow<String?>,
   returnKeyType: StateFlow<String?>,
   onTextChange: (value: String) -> Unit,
@@ -73,6 +75,7 @@ fun JetpackComposeView(
   val state = remember { TextFieldState(value) }
   val style by inputStyle.collectAsState()
   val keyboardTypeValue by keyboardType.collectAsState()
+  val autoCapitalizeValue by autoCapitalize.collectAsState()
   val returnKeyTypeValue by returnKeyType.collectAsState()
   val autoCompleteValue by autoComplete.collectAsState()
   val interactionSource = remember { MutableInteractionSource() }
@@ -165,6 +168,7 @@ fun JetpackComposeView(
         fontFamily = fontFamily,
       ),
       keyboardOptions = KeyboardOptions(
+        capitalization = toComposeCapitalization(autoCapitalizeValue),
         keyboardType = toComposeKeyboardType(keyboardTypeValue),
         imeAction = toComposeImeAction(returnKeyTypeValue),
       ),
@@ -191,6 +195,14 @@ private fun toComposeKeyboardType(value: String?): KeyboardType = when (value) {
   "decimal-pad" -> KeyboardType.Decimal
   "visible-password" -> KeyboardType.Password
   else -> KeyboardType.Text
+}
+
+private fun toComposeCapitalization(value: String?): KeyboardCapitalization = when (value) {
+  "none" -> KeyboardCapitalization.None
+  "characters" -> KeyboardCapitalization.Characters
+  "words" -> KeyboardCapitalization.Words
+  "sentences" -> KeyboardCapitalization.Sentences
+  else -> KeyboardCapitalization.Sentences
 }
 
 private fun toComposeImeAction(value: String?): ImeAction = when (value) {
