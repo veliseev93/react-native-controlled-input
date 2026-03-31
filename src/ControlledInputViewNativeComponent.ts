@@ -39,6 +39,8 @@ export interface InputStyle {
 export interface NativeProps extends ViewProps {
   value?: string;
   placeholder?: string;
+  placeholderTextColor?: ColorValue;
+  selectionColor?: ColorValue;
   autoComplete?: string;
   autoCapitalize?: string;
   keyboardType?: string;

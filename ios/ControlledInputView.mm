@@ -72,6 +72,14 @@ using namespace facebook::react;
         _inputView.placeholder = newViewProps.placeholder.empty() ? nil : [NSString stringWithUTF8String:newViewProps.placeholder.c_str()];
     }
 
+    if (oldViewProps.placeholderTextColor != newViewProps.placeholderTextColor) {
+        _inputView.placeholderTextColor = RCTUIColorFromSharedColor(newViewProps.placeholderTextColor);
+    }
+
+    if (oldViewProps.selectionColor != newViewProps.selectionColor) {
+        _inputView.selectionColor = RCTUIColorFromSharedColor(newViewProps.selectionColor);
+    }
+
     const auto &style = newViewProps.inputStyle;
     const auto &oldStyle = oldViewProps.inputStyle;
 

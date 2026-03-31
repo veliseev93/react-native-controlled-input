@@ -49,7 +49,15 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
     }
 
     @objc public var placeholder: String? {
-        didSet { textField.placeholder = placeholder }
+        didSet { applyPlaceholder() }
+    }
+
+    @objc public var placeholderTextColor: UIColor? {
+        didSet { applyPlaceholder() }
+    }
+
+    @objc public var selectionColor: UIColor? {
+        didSet { textField.tintColor = selectionColor }
     }
 
     public override var canBecomeFirstResponder: Bool { true }
@@ -75,6 +83,7 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.borderStyle = .none
         textField.delegate = self
+        textField.textColor = textColor
         addSubview(textField)
 
         NSLayoutConstraint.activate([
@@ -89,6 +98,25 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
         applyAutoCapitalize()
         applyKeyboardType()
         applyReturnKeyType()
+        applyPlaceholder()
+    }
+
+    private func applyPlaceholder() {
+        guard let placeholder = placeholder else {
+            textField.attributedPlaceholder = nil
+            return
+        }
+
+        var attributes: [NSAttributedString.Key: Any] = [:]
+        if let placeholderTextColor = placeholderTextColor {
+            attributes[.foregroundColor] = placeholderTextColor
+        }
+
+        textField.attributedPlaceholder = NSAttributedString(string: placeholder, attributes: attributes)
+
+        if let color = textColor {
+            textField.textColor = color
+        }
     }
 
     public func textFieldDidBeginEditing(_ textField: UITextField) {

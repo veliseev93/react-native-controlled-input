@@ -96,6 +96,8 @@ class ControlledInputView : LinearLayout {
           inputStyle = viewModel.inputStyle,
           autoComplete = viewModel.autoComplete,
           placeholder = viewModel.placeholder,
+          placeholderTextColor = viewModel.placeholderTextColor,
+          selectionColor = viewModel.selectionColor,
           autoCapitalize = viewModel.autoCapitalize,
           keyboardType = viewModel.keyboardType,
           returnKeyType = viewModel.returnKeyType,

@@ -26,6 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import android.graphics.Typeface
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -65,6 +68,8 @@ fun JetpackComposeView(
   inputStyle: StateFlow<InputStyle?>,
   autoComplete: StateFlow<String?>,
   placeholder: StateFlow<String?>,
+  placeholderTextColor: StateFlow<Int?>,
+  selectionColor: StateFlow<Int?>,
   autoCapitalize: StateFlow<String?>,
   keyboardType: StateFlow<String?>,
   returnKeyType: StateFlow<String?>,
@@ -80,6 +85,8 @@ fun JetpackComposeView(
   val returnKeyTypeValue by returnKeyType.collectAsState()
   val autoCompleteValue by autoComplete.collectAsState()
   val placeholderValue by placeholder.collectAsState()
+  val placeholderTextColorValue by placeholderTextColor.collectAsState()
+  val selectionColorValue by selectionColor.collectAsState()
   val interactionSource = remember { MutableInteractionSource() }
 
   val autofill = LocalAutofill.current
@@ -139,61 +146,74 @@ fun JetpackComposeView(
     ?: Color.Transparent
   val shape = RoundedCornerShape(borderRadius)
 
-  Box(
-    modifier = Modifier
-      .fillMaxSize()
-      .clip(shape)
-      .background(backgroundColor)
-      .border(borderWidth, borderColor, shape),
-  ) {
-    BasicTextField(
-      state,
-      inputTransformation = InputTransformation.byValue { _, proposed ->
-        onTextChange(proposed.toString())
-        proposed
-      },
+  val cursorColor = selectionColorValue?.let { Color(it) } ?: textColor
+  val textSelectionColors = remember(cursorColor) {
+    TextSelectionColors(
+      handleColor = cursorColor,
+      backgroundColor = cursorColor.copy(alpha = 0.4f)
+    )
+  }
+
+  CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
+    Box(
       modifier = Modifier
         .fillMaxSize()
-        .padding(
-          start = paddingLeft,
-          top = paddingTop,
-          end = paddingRight,
-          bottom = paddingBottom,
-        )
-        .onGloballyPositioned {
-          autofillNode.boundingBox = it.boundsInWindow()
-        }
-        .focusRequester(focusRequester),
-      textStyle = TextStyle(
-        color = textColor,
-        fontSize = fontSize,
-        fontFamily = fontFamily,
-      ),
-      keyboardOptions = KeyboardOptions(
-        capitalization = toComposeCapitalization(autoCapitalizeValue),
-        keyboardType = toComposeKeyboardType(keyboardTypeValue),
-        imeAction = toComposeImeAction(returnKeyTypeValue),
-      ),
-      interactionSource = interactionSource,
-      decorator = { innerTextField ->
-        Box(
-          modifier = Modifier.fillMaxSize(),
-          contentAlignment = Alignment.CenterStart,
-        ) {
-          if (state.text.isEmpty() && !placeholderValue.isNullOrEmpty()) {
-            androidx.compose.material3.Text(
-              text = placeholderValue!!,
-              style = TextStyle(
-                color = textColor.copy(alpha = 0.5f),
-                fontSize = fontSize,
-                fontFamily = fontFamily,
-              )
-            )
+        .clip(shape)
+        .background(backgroundColor)
+        .border(borderWidth, borderColor, shape),
+    ) {
+      BasicTextField(
+        state,
+        inputTransformation = InputTransformation.byValue { _, proposed ->
+          onTextChange(proposed.toString())
+          proposed
+        },
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(
+            start = paddingLeft,
+            top = paddingTop,
+            end = paddingRight,
+            bottom = paddingBottom,
+          )
+          .onGloballyPositioned {
+            autofillNode.boundingBox = it.boundsInWindow()
           }
-          innerTextField()
-        }
-      },
-    )
+          .focusRequester(focusRequester),
+        textStyle = TextStyle(
+          color = textColor,
+          fontSize = fontSize,
+          fontFamily = fontFamily,
+        ),
+        keyboardOptions = KeyboardOptions(
+          capitalization = toComposeCapitalization(autoCapitalizeValue),
+          keyboardType = toComposeKeyboardType(keyboardTypeValue),
+          imeAction = toComposeImeAction(returnKeyTypeValue),
+        ),
+        interactionSource = interactionSource,
+        cursorBrush = androidx.compose.ui.graphics.SolidColor(cursorColor),
+        decorator = { innerTextField ->
+          Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.CenterStart,
+          ) {
+            if (state.text.isEmpty() && !placeholderValue.isNullOrEmpty()) {
+              val finalPlaceholderColor = placeholderTextColorValue?.let { Color(it) }
+                ?: textColor.copy(alpha = 0.5f)
+              androidx.compose.material3.Text(
+                text = placeholderValue!!,
+                style = TextStyle(
+                  color = finalPlaceholderColor,
+                  fontSize = fontSize,
+                  fontFamily = fontFamily,
+                )
+              )
+            }
+            innerTextField()
+          }
+        },
+      )
+    }
   }
 }
 

@@ -43,6 +43,16 @@ class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
     view.viewModel.setPlaceholder(placeholder)
   }
 
+  @ReactProp(name = "placeholderTextColor", customType = "Color")
+  override fun setPlaceholderTextColor(view: ControlledInputView, placeholderTextColor: Int?) {
+    view.viewModel.setPlaceholderTextColor(placeholderTextColor)
+  }
+
+  @ReactProp(name = "selectionColor", customType = "Color")
+  override fun setSelectionColor(view: ControlledInputView, selectionColor: Int?) {
+    view.viewModel.setSelectionColor(selectionColor)
+  }
+
   @ReactProp(name = "autoComplete")
   override fun setAutoComplete(view: ControlledInputView, autoComplete: String?) {
     view.viewModel.setAutoCompleteWithAutofill(view, autoComplete)

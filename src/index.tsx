@@ -31,6 +31,8 @@ type ForwardedTextInputProps = Pick<
   | 'keyboardType'
   | 'returnKeyType'
   | 'placeholder'
+  | 'placeholderTextColor'
+  | 'selectionColor'
 >;
 
 export type ControlledInputViewProps = Omit<
@@ -72,7 +74,10 @@ function resolveAndroidComposeViewPadding(flat: Record<string, any>) {
 
 export const ControlledInputView = memo(
   forwardRef<ControlledInputViewRef, ControlledInputViewProps>(
-    ({ style, onTextChange, ...rest }, ref) => {
+    (
+      { style, onTextChange, selectionColor, placeholderTextColor, ...rest },
+      ref
+    ) => {
       const nativeRef =
         useRef<ElementRef<typeof ControlledInputViewNativeComponent>>(null);
 
@@ -145,6 +150,8 @@ export const ControlledInputView = memo(
       return (
         <ControlledInputViewNativeComponent
           {...rest}
+          placeholderTextColor={placeholderTextColor}
+          selectionColor={selectionColor}
           style={viewStyle}
           inputStyle={inputStyle}
           onTextChange={handleTextChange}
