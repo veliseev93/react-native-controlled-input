@@ -43,11 +43,34 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
   internal lateinit var viewModel: JetpackComposeViewModel
   private val blurSignal = MutableStateFlow(0)
   private val focusSignal = MutableStateFlow(0)
+  private lateinit var composeView: ComposeView
+
+  override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+    if (composeView.isAttachedToWindow) {
+      super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    } else {
+      val width = maxOf(0, MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight)
+      val height = maxOf(0, MeasureSpec.getSize(heightMeasureSpec) - paddingTop - paddingBottom)
+      val child = composeView.getChildAt(0)
+      if (child == null) {
+        setMeasuredDimension(width, height)
+        return
+      }
+      child.measure(
+        MeasureSpec.makeMeasureSpec(width, MeasureSpec.getMode(widthMeasureSpec)),
+        MeasureSpec.makeMeasureSpec(height, MeasureSpec.getMode(heightMeasureSpec)),
+      )
+      setMeasuredDimension(
+        child.measuredWidth + paddingLeft + paddingRight,
+        child.measuredHeight + paddingTop + paddingBottom
+      )
+    }
+  }
 
   override fun onAttachedToWindow() {
+    super.onAttachedToWindow()
     setViewTreeLifecycleOwner(this)
     lifecycleRegistry.currentState = Lifecycle.State.RESUMED
-    super.onAttachedToWindow()
   }
 
   override fun onDetachedFromWindow() {
@@ -80,7 +103,8 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
       LayoutParams.MATCH_PARENT
     )
 
-    ComposeView(context).also {
+    composeView = ComposeView(context)
+    composeView.also { it ->
       it.layoutParams = LayoutParams(
         LayoutParams.MATCH_PARENT,
         LayoutParams.MATCH_PARENT
