@@ -2,6 +2,7 @@ import {
   forwardRef,
   memo,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   type ElementRef,
 } from 'react';
@@ -13,8 +14,10 @@ import {
   type ViewStyle,
   type TextStyle,
 } from 'react-native';
+// TextInputState is not exported from the public react-native package.
+// eslint-disable-next-line @react-native/no-deep-imports -- integrate with ScrollView keyboard dismissal
+import TextInputState from 'react-native/Libraries/Components/TextInput/TextInputState';
 import ControlledInputViewNativeComponent, {
-  Commands,
   type NativeProps,
   type TextChangeEvent,
 } from './ControlledInputViewNativeComponent';
@@ -42,6 +45,13 @@ export type ControlledInputViewProps = Omit<
   ForwardedTextInputProps & {
     onTextChange?: (value: string) => void;
   };
+
+type ControlledInputFocusEvent = Parameters<
+  NonNullable<NativeProps['onFocus']>
+>[0];
+type ControlledInputBlurEvent = Parameters<
+  NonNullable<NativeProps['onBlur']>
+>[0];
 
 // All style props that Android handles via Compose instead of the native View layer
 const androidComposeHandledKeys = [
@@ -75,11 +85,42 @@ function resolveAndroidComposeViewPadding(flat: Record<string, any>) {
 export const ControlledInputView = memo(
   forwardRef<ControlledInputViewRef, ControlledInputViewProps>(
     (
-      { style, onTextChange, selectionColor, placeholderTextColor, ...rest },
+      {
+        style,
+        onTextChange,
+        onFocus,
+        onBlur,
+        selectionColor,
+        placeholderTextColor,
+        ...rest
+      },
       ref
     ) => {
       const nativeRef =
         useRef<ElementRef<typeof ControlledInputViewNativeComponent>>(null);
+
+      const isNativePlatform =
+        Platform.OS === 'ios' || Platform.OS === 'android';
+
+      useLayoutEffect(() => {
+        if (!isNativePlatform) {
+          return;
+        }
+
+        const node = nativeRef.current;
+        if (node == null) {
+          return;
+        }
+
+        TextInputState.registerInput(node);
+
+        return () => {
+          TextInputState.unregisterInput(node);
+          if (TextInputState.currentlyFocusedInput() === node) {
+            TextInputState.blurTextInput(node);
+          }
+        };
+      }, [isNativePlatform]);
 
       const flattenedStyle = (StyleSheet.flatten(style) ?? {}) as TextStyle;
 
@@ -132,18 +173,28 @@ export const ControlledInputView = memo(
         }
       };
 
+      const handleFocus = (e: ControlledInputFocusEvent) => {
+        if (isNativePlatform) {
+          TextInputState.focusInput(nativeRef.current);
+        }
+        onFocus?.(e);
+      };
+
+      const handleBlur = (e: ControlledInputBlurEvent) => {
+        if (isNativePlatform) {
+          TextInputState.blurInput(nativeRef.current);
+        }
+        onBlur?.(e);
+      };
+
       useImperativeHandle(ref, () => ({
         blur: () => {
-          if (!nativeRef.current) return;
-          if (Platform.OS === 'ios' || Platform.OS === 'android') {
-            Commands.blur(nativeRef.current);
-          }
+          if (!nativeRef.current || !isNativePlatform) return;
+          TextInputState.blurTextInput(nativeRef.current);
         },
         focus: () => {
-          if (!nativeRef.current) return;
-          if (Platform.OS === 'ios' || Platform.OS === 'android') {
-            Commands.focus(nativeRef.current);
-          }
+          if (!nativeRef.current || !isNativePlatform) return;
+          TextInputState.focusTextInput(nativeRef.current);
         },
       }));
 
@@ -155,6 +206,8 @@ export const ControlledInputView = memo(
           style={viewStyle}
           inputStyle={inputStyle}
           onTextChange={handleTextChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           ref={nativeRef}
         />
       );

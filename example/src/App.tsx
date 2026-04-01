@@ -31,7 +31,10 @@ export default function App() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} onTouchStart={blur}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+    >
       <ControlledInputView
         value={value}
         ref={inputRef}

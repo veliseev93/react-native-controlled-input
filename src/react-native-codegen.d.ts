@@ -19,3 +19,19 @@ declare module 'react-native/Libraries/Utilities/codegenNativeComponent' {
     componentName: string
   ): HostComponent<T>;
 }
+
+declare module 'react-native/Libraries/Components/TextInput/TextInputState' {
+  import type { HostInstance } from 'react-native';
+
+  const TextInputState: {
+    registerInput(textField: HostInstance): void;
+    unregisterInput(textField: HostInstance): void;
+    focusInput(textField: HostInstance | null): void;
+    blurInput(textField: HostInstance | null): void;
+    focusTextInput(textField: HostInstance | null): void;
+    blurTextInput(textField: HostInstance | null): void;
+    currentlyFocusedInput(): HostInstance | null;
+  };
+
+  export default TextInputState;
+}
