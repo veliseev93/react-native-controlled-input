@@ -45,9 +45,9 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
   private val focusSignal = MutableStateFlow(0)
 
   override fun onAttachedToWindow() {
-    super.onAttachedToWindow()
     setViewTreeLifecycleOwner(this)
     lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+    super.onAttachedToWindow()
   }
 
   override fun onDetachedFromWindow() {
