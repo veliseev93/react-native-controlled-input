@@ -1,6 +1,6 @@
 {
   "name": "react-native-controlled-input",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "React Native Controlled Inputative Controlled Input",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
