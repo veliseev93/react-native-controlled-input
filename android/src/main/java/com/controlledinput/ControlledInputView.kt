@@ -11,11 +11,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.setViewTreeLifecycleOwner
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.uimanager.UIManagerHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class ControlledInputView : LinearLayout {
+class ControlledInputView : LinearLayout, LifecycleOwner {
   constructor(context: Context) : super(context) {
     configureComponent(context)
   }
@@ -32,9 +37,23 @@ class ControlledInputView : LinearLayout {
     configureComponent(context)
   }
 
+  private val lifecycleRegistry = LifecycleRegistry(this)
+  override val lifecycle: Lifecycle get() = lifecycleRegistry
+
   internal lateinit var viewModel: JetpackComposeViewModel
   private val blurSignal = MutableStateFlow(0)
   private val focusSignal = MutableStateFlow(0)
+
+  override fun onAttachedToWindow() {
+    super.onAttachedToWindow()
+    setViewTreeLifecycleOwner(this)
+    lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+  }
+
+  override fun onDetachedFromWindow() {
+    super.onDetachedFromWindow()
+    lifecycleRegistry.currentState = Lifecycle.State.CREATED
+  }
 
   fun blur() {
     // триггерим compose снять фокус
@@ -67,6 +86,8 @@ class ControlledInputView : LinearLayout {
         LayoutParams.MATCH_PARENT
       )
       it.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+
+      it.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
       viewModel = JetpackComposeViewModel()
 
