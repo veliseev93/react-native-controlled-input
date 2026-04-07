@@ -2,8 +2,10 @@ package com.controlledinput
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
+import androidx.annotation.UiThread
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,11 +17,22 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.uimanager.UIManagerHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 
+/**
+ * RN + Jetpack Compose hosting view aligned with Expo UI / [ExpoComposeView] + [ExpoView]:
+ * - [shouldUseAndroidLayout]: requestLayout posts measureAndLayout (RN #17968)
+ * - onMeasure skips child [ComposeView] until attached (window + WindowRecomposer)
+ *
+ * @see expo.modules.kotlin.views.ExpoComposeView
+ * @see expo.modules.kotlin.views.ExpoView
+ */
 class ControlledInputView : LinearLayout, LifecycleOwner {
   constructor(context: Context) : super(context) {
     configureComponent(context)
@@ -44,92 +57,136 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
   private val blurSignal = MutableStateFlow(0)
   private val focusSignal = MutableStateFlow(0)
   private lateinit var composeView: ComposeView
+  private var usesLocalFallbackLifecycle = false
+  private var windowLifecycleBound = false
+
+  /** Same role as ExpoComposeView(withHostingView = true) → ExpoView.shouldUseAndroidLayout */
+  private val shouldUseAndroidLayout = true
 
   override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-    if (composeView.isAttachedToWindow) {
-      super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-    } else {
-      val width = maxOf(0, MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight)
-      val height = maxOf(0, MeasureSpec.getSize(heightMeasureSpec) - paddingTop - paddingBottom)
-      val child = composeView.getChildAt(0)
-      if (child == null) {
-        setMeasuredDimension(width, height)
-        return
-      }
-      child.measure(
-        MeasureSpec.makeMeasureSpec(width, MeasureSpec.getMode(widthMeasureSpec)),
-        MeasureSpec.makeMeasureSpec(height, MeasureSpec.getMode(heightMeasureSpec)),
-      )
+    // ExpoComposeView.onMeasure — do not measure ComposeView until attached to a window.
+    if (shouldUseAndroidLayout && !isAttachedToWindow) {
       setMeasuredDimension(
-        child.measuredWidth + paddingLeft + paddingRight,
-        child.measuredHeight + paddingTop + paddingBottom
+        MeasureSpec.getSize(widthMeasureSpec).coerceAtLeast(0),
+        MeasureSpec.getSize(heightMeasureSpec).coerceAtLeast(0)
       )
+      return
     }
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+  }
+
+  /**
+   * ExpoView.requestLayout / measureAndLayout — Fabric/Yoga often won't drive Android layout
+   * for native children; this mirrors expo-modules-core behavior.
+   */
+  override fun requestLayout() {
+    super.requestLayout()
+    if (shouldUseAndroidLayout) {
+      post { measureAndLayout() }
+    }
+  }
+
+  @UiThread
+  private fun measureAndLayout() {
+    measure(
+      MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+      MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
+    )
+    layout(left, top, right, bottom)
   }
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
-    setViewTreeLifecycleOwner(this)
-    lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+    bindComposeToWindowLifecycle()
   }
 
   override fun onDetachedFromWindow() {
+    if (usesLocalFallbackLifecycle) {
+      lifecycleRegistry.currentState = Lifecycle.State.CREATED
+    }
     super.onDetachedFromWindow()
-    lifecycleRegistry.currentState = Lifecycle.State.CREATED
+  }
+
+  private fun bindComposeToWindowLifecycle() {
+    if (windowLifecycleBound) {
+      return
+    }
+    windowLifecycleBound = true
+
+    val activity = (context as? ReactContext)?.currentActivity
+    val activityOwner = activity as? LifecycleOwner
+    if (activityOwner != null) {
+      usesLocalFallbackLifecycle = false
+      composeView.setViewTreeLifecycleOwner(activityOwner)
+      val savedStateOwner = activity as? SavedStateRegistryOwner
+      if (savedStateOwner != null) {
+        composeView.setViewTreeSavedStateRegistryOwner(savedStateOwner)
+      }
+    } else {
+      findViewTreeLifecycleOwnerFromAncestors()?.let { parentOwner ->
+        usesLocalFallbackLifecycle = false
+        composeView.setViewTreeLifecycleOwner(parentOwner)
+      } ?: run {
+        usesLocalFallbackLifecycle = true
+        composeView.setViewTreeLifecycleOwner(this)
+        lifecycleRegistry.currentState = Lifecycle.State.RESUMED
+      }
+    }
+  }
+
+  private fun findViewTreeLifecycleOwnerFromAncestors(): LifecycleOwner? {
+    var parent = this.parent as? View ?: return null
+    while (true) {
+      parent.findViewTreeLifecycleOwner()?.let {
+        return it
+      }
+      parent = parent.parent as? View ?: return null
+    }
   }
 
   fun blur() {
-    // триггерим compose снять фокус
     blurSignal.value = blurSignal.value + 1
-
-    // на всякий случай прячем клавиатуру на уровне View
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(windowToken, 0)
-
-    // и снимаем фокус у самого android view (не всегда достаточно, но не мешает)
     clearFocus()
   }
 
   fun focus() {
-    // триггерим compose запросить фокус
     focusSignal.value = focusSignal.value + 1
   }
 
   private fun configureComponent(context: Context) {
     setBackgroundColor(android.graphics.Color.TRANSPARENT)
+    clipChildren = false
+    clipToPadding = false
 
     layoutParams = LayoutParams(
       LayoutParams.MATCH_PARENT,
       LayoutParams.MATCH_PARENT
     )
 
-    composeView = ComposeView(context)
-    composeView.also { it ->
-      it.layoutParams = LayoutParams(
+    viewModel = JetpackComposeViewModel()
+
+    composeView = ComposeView(context).also { cv ->
+      cv.layoutParams = LayoutParams(
         LayoutParams.MATCH_PARENT,
         LayoutParams.MATCH_PARENT
       )
-      it.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-
-      it.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-
-      viewModel = JetpackComposeViewModel()
-
-      it.setContent {
+      cv.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+      cv.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+      cv.setContent {
         val value = viewModel.value.collectAsState().value
         val blurTick by blurSignal.collectAsState()
         val focusTick by focusSignal.collectAsState()
         val focusManager = LocalFocusManager.current
         val focusRequester = remember { FocusRequester() }
 
-        // при каждом blurTick снимаем фокус в compose
         LaunchedEffect(blurTick) {
           if (blurTick > 0) {
             focusManager.clearFocus(force = true)
           }
         }
 
-        // при каждом focusTick запрашиваем фокус в compose
         LaunchedEffect(focusTick) {
           if (focusTick > 0) {
             focusRequester.requestFocus()
@@ -148,7 +205,7 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
           returnKeyType = viewModel.returnKeyType,
           onTextChange = { value ->
             val surfaceId = UIManagerHelper.getSurfaceId(context)
-            val viewId = this.id
+            val viewId = this@ControlledInputView.id
             UIManagerHelper
               .getEventDispatcherForReactTag(context as ReactContext, viewId)
               ?.dispatchEvent(
@@ -161,7 +218,7 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
           },
           onFocus = {
             val surfaceId = UIManagerHelper.getSurfaceId(context)
-            val viewId = this.id
+            val viewId = this@ControlledInputView.id
             UIManagerHelper
               .getEventDispatcherForReactTag(context as ReactContext, viewId)
               ?.dispatchEvent(
@@ -173,7 +230,7 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
           },
           onBlur = {
             val surfaceId = UIManagerHelper.getSurfaceId(context)
-            val viewId = this.id
+            val viewId = this@ControlledInputView.id
             UIManagerHelper
               .getEventDispatcherForReactTag(context as ReactContext, viewId)
               ?.dispatchEvent(
@@ -186,8 +243,7 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
           focusRequester = focusRequester
         )
       }
-      addView(it)
-
+      addView(cv)
     }
   }
 }
