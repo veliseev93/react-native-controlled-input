@@ -60,11 +60,10 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
   private var usesLocalFallbackLifecycle = false
   private var windowLifecycleBound = false
 
-  /** Same role as ExpoComposeView(withHostingView = true) → ExpoView.shouldUseAndroidLayout */
   private val shouldUseAndroidLayout = true
 
   override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-    // ExpoComposeView.onMeasure — do not measure ComposeView until attached to a window.
+    // Do not measure ComposeView until attached to a window.
     if (shouldUseAndroidLayout && !isAttachedToWindow) {
       setMeasuredDimension(
         MeasureSpec.getSize(widthMeasureSpec).coerceAtLeast(0),
@@ -75,10 +74,7 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec)
   }
 
-  /**
-   * ExpoView.requestLayout / measureAndLayout — Fabric/Yoga often won't drive Android layout
-   * for native children; this mirrors expo-modules-core behavior.
-   */
+  // Fabric/Yoga often won't drive Android layout for native children.
   override fun requestLayout() {
     super.requestLayout()
     if (shouldUseAndroidLayout) {

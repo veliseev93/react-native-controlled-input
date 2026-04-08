@@ -148,8 +148,7 @@ public class RNControlledInput: UIView, UITextFieldDelegate {
             textField.font = UIFont.systemFont(ofSize: fontSize)
             return
         }
-        // UIFont(name:size:) needs the PostScript name. Expo's useFonts keys are aliased via a
-        // swizzled UIFont.fontNames(forFamilyName:) — RN Text resolves aliases that way, so we must too.
+        
         if let font = UIFont(name: family, size: fontSize) {
             textField.font = font
             return
