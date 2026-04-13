@@ -51,6 +51,7 @@ import kotlinx.coroutines.flow.StateFlow
 data class InputStyle(
   val color: String? = null,
   val fontSize: Double? = null,
+  val height: Double? = null,
   val fontFamily: String? = null,
   val paddingTop: Double? = null,
   val paddingBottom: Double? = null,

@@ -165,11 +165,17 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
     }
   }
 
-  /** Approximate one line height in dp for JS customHeight. */
+  /**
+   * `selection.end.y` for KBC / JS customHeight: prefer explicit style height (dp, same as padding
+   * in [InputStyle]), else measured view height in dp.
+   */
   private fun approximateSelectionEndYDp(): Double {
-    viewModel.inputStyle.value?.fontSize?.toDouble()?.takeIf { it > 0 }?.let { return it }
+    viewModel.inputStyle.value?.height?.takeIf { it > 0 }?.let { return it }
     val dm = resources.displayMetrics
-    return (kbcLayoutHost.textSize / dm.density).toDouble().coerceAtLeast(12.0)
+    if (height > 0) {
+      return (height / dm.density).toDouble()
+    }
+    return 12.0
   }
 
   private fun dispatchSyntheticKbcSelectionEvent(observer: Any) {

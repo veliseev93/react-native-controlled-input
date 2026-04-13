@@ -146,6 +146,9 @@ export const ControlledInputView = memo(
         inputStyle = {
           color: flattenedStyle.color,
           fontSize: flattenedStyle.fontSize,
+          ...(typeof flattenedStyle.height === 'number'
+            ? { height: flattenedStyle.height }
+            : {}),
           fontFamily: flattenedStyle.fontFamily,
           ...(hasPadding
             ? resolveAndroidComposeViewPadding(flattenedStyle)

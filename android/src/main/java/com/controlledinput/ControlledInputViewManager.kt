@@ -81,6 +81,7 @@ class ControlledInputViewManager : SimpleViewManager<ControlledInputView>(),
       InputStyle(
         color = if (inputStyle.hasKey("color")) inputStyle.getString("color") else null,
         fontSize = if (inputStyle.hasKey("fontSize")) inputStyle.getDouble("fontSize") else null,
+        height = if (inputStyle.hasKey("height")) inputStyle.getDouble("height") else null,
         fontFamily = if (inputStyle.hasKey("fontFamily")) inputStyle.getString("fontFamily") else null,
         paddingTop = if (inputStyle.hasKey("paddingTop")) inputStyle.getDouble("paddingTop") else null,
         paddingBottom = if (inputStyle.hasKey("paddingBottom")) inputStyle.getDouble("paddingBottom") else null,
