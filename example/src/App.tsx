@@ -1,61 +1,89 @@
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useRef, useState, type ReactElement } from 'react';
-import { StyleSheet, ScrollView, Button } from 'react-native';
+import { StyleSheet, View, Text, Button, TextInput } from 'react-native';
 import {
   ControlledInputView,
   type ControlledInputViewRef,
 } from 'react-native-controlled-input';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import {
+  KeyboardAwareScrollView,
+  KeyboardProvider,
+} from 'react-native-keyboard-controller';
+import { SheetExample } from './SheetExample';
 
-export default function App(): ReactElement {
+function InputScreen(): ReactElement {
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<ControlledInputViewRef>(null);
 
-  const handleValueChange = (text: string): void => {
-    setValue(text.replace(/\d/g, ''));
-  };
-
-  const handleFocus = (): void => {
-    setIsFocused(true);
-  };
-
-  const handleBlur = (): void => {
-    setIsFocused(false);
-  };
-
-  const focus = (): void => {
-    inputRef.current?.focus();
-  };
-
-  const blur = (): void => {
-    inputRef.current?.blur();
-  };
-
   return (
-    <ScrollView
+    <KeyboardAwareScrollView
       contentContainerStyle={styles.container}
       keyboardShouldPersistTaps='handled'
+      mode='layout'
     >
+      {/* Spacer to push input below the fold so scroll is required */}
+      <View style={styles.spacer}>
+        <Text style={styles.hint}>
+          Tap the input below — it should scroll into view above the keyboard
+        </Text>
+        <SheetExample />
+      </View>
+     <TextInput style={styles.input} />
       <ControlledInputView
         value={value}
         ref={inputRef}
-        placeholder='Type something...'
-        onTextChange={handleValueChange}
+        placeholder='Type something (no digits)...'
+        onTextChange={(text) => setValue(text.replace(/\d/g, ''))}
         style={[styles.input, isFocused && styles.focusedInput]}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
+        onFocus={() => {
+          console.log('[ControlledInput] onFocus fired');
+          setIsFocused(true);
+        }}
+        onBlur={() => {
+          console.log('[ControlledInput] onBlur fired');
+          setIsFocused(false);
+        }}
       />
-      <Button title='Focus' onPress={focus} />
-      <Button title='Blur' onPress={blur} />
-    </ScrollView>
+
+      <Button title='FOCUS' onPress={() => inputRef.current?.focus()} />
+      <Button title='BLUR' onPress={() => inputRef.current?.blur()} />
+    </KeyboardAwareScrollView>
+  );
+}
+
+export default function App(): ReactElement {
+  return (
+    <GestureHandlerRootView style={styles.root}>
+      <KeyboardProvider>
+        <BottomSheetModalProvider>
+          <InputScreen />
+        </BottomSheetModalProvider>
+      </KeyboardProvider>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   container: {
     backgroundColor: '#ffffff',
-    justifyContent: 'center',
-    flex: 1,
-    gap: 20,
+    paddingBottom: 40,
+  },
+  spacer: {
+    height: 600,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    gap: 12,
+  },
+  hint: {
+    color: '#888',
+    fontSize: 14,
+    textAlign: 'center',
   },
   input: {
     height: 48,
@@ -67,7 +95,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F8FA',
     paddingHorizontal: 10,
     color: '#000000',
-    fontFamily: 'AlbertSans-Regular',
   },
   focusedInput: {
     borderColor: '#167BF1',
