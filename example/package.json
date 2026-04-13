@@ -10,6 +10,7 @@
     "build:ios": "react-native build-ios --mode Debug"
   },
   "dependencies": {
+    "react-native-controlled-input": "*",
     "@react-navigation/bottom-tabs": "^7.15.9",
     "@react-navigation/native": "^7.2.2",
     "react": "19.2.0",

@@ -1,9 +1,9 @@
+import { useRef, useState, type ReactElement } from 'react';
+import { StyleSheet, ScrollView, Button } from 'react-native';
 import {
   ControlledInputView,
   type ControlledInputViewRef,
-} from '@ronas-it/react-native-controlled-input';
-import { useRef, useState, type ReactElement } from 'react';
-import { StyleSheet, ScrollView, Button } from 'react-native';
+} from 'react-native-controlled-input';
 
 export default function App(): ReactElement {
   const [value, setValue] = useState('');

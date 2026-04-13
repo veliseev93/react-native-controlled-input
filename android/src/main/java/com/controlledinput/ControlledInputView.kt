@@ -2,6 +2,7 @@ package com.controlledinput
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -84,7 +85,17 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
   }
 
   private fun requestFocusProxy() {
+    // Sync textSize so KeyboardControllerSelectionWatcher computes the correct
+    // cursor Y via android.text.Layout.getLineBottom() — used as `customHeight`
+    // in KeyboardAwareScrollView to determine how far to scroll.
+    viewModel.inputStyle.value?.fontSize?.toFloat()?.let { fontSize ->
+      focusProxy.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
+    }
     focusProxy.requestFocus()
+    // setSelection triggers a selection change (lastSelectionStart starts at -1),
+    // guaranteeing the watcher fires on the next pre-draw frame even if focus
+    // was just transferred.
+    focusProxy.setSelection(0)
   }
 
   private fun clearFocusProxy() {
