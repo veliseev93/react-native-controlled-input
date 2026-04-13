@@ -44,7 +44,7 @@ function SheetContent({ onClose }: { onClose: () => void }): ReactElement {
   const [notes, setNotes] = useState('');
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps='handled' mode='layout'>
+    <KeyboardAwareScrollView contentContainerStyle={styles.container}>
       <SheetHeader onCancel={onClose} onDone={onClose} />
 
       <View style={styles.section}>
@@ -124,7 +124,10 @@ function renderBackdrop(props: BottomSheetDefaultBackdropProps): ReactElement {
 export function SheetExample(): ReactElement {
   const sheetRef = useRef<BottomSheetModal>(null);
 
-  const open = (): void => sheetRef.current?.present();
+  const open = (): void => {
+    console.log('open')
+    sheetRef.current?.present()
+  };
   const close = (): void => sheetRef.current?.dismiss();
 
   return (
@@ -182,6 +185,7 @@ const styles = StyleSheet.create({
   container: {
     gap: 24,
     paddingBottom: 40,
+    height: '100%',
   },
   section: {
     gap: 8,
