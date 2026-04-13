@@ -64,19 +64,21 @@ inputRef.current?.blur();
 
 ## Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `value` | `string` | Current input value. |
-| `onTextChange` | `(value: string) => void` | Called with the next text value. Filter it and update `value`. |
-| `onFocus` | `() => void` | Called when the text input is focused. |
-| `onBlur` | `() => void` | Called when the text input is blurred. |
-| `autoComplete` | `string` | Specifies autocomplete hints for the system. Same as React Native [`TextInput`](https://reactnative.dev/docs/textinput#autocomplete). |
-| `autoCapitalize` | `string` | Can be `none`, `sentences`, `words`, `characters`. Same as React Native [`TextInput`](https://reactnative.dev/docs/textinput#autocapitalize). |
-| `keyboardType` | `string` | Determines which keyboard to open, e.g. `numeric`. Same as React Native [`TextInput`](https://reactnative.dev/docs/textinput#keyboardtype). |
-| `returnKeyType` | `string` | Determines how the return key should look. Same as React Native [`TextInput`](https://reactnative.dev/docs/textinput#returnkeytype). |
-| `placeholder` | `string` | The string that will be rendered before text input has been entered. |
-| `placeholderTextColor` | `ColorValue` | The text color of the placeholder string. |
-| `selectionColor` | `ColorValue` | The highlight and cursor color of the text input. |
+
+| Prop                   | Type                      | Description                                                                                                                                   |
+| ---------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `value`                | `string`                  | Current input value.                                                                                                                          |
+| `onTextChange`         | `(value: string) => void` | Called with the next text value. Filter it and update `value`.                                                                                |
+| `onFocus`              | `() => void`              | Called when the text input is focused.                                                                                                        |
+| `onBlur`               | `() => void`              | Called when the text input is blurred.                                                                                                        |
+| `autoComplete`         | `string`                  | Specifies autocomplete hints for the system. Same as React Native `[TextInput](https://reactnative.dev/docs/textinput#autocomplete)`.         |
+| `autoCapitalize`       | `string`                  | Can be `none`, `sentences`, `words`, `characters`. Same as React Native `[TextInput](https://reactnative.dev/docs/textinput#autocapitalize)`. |
+| `keyboardType`         | `string`                  | Determines which keyboard to open, e.g. `numeric`. Same as React Native `[TextInput](https://reactnative.dev/docs/textinput#keyboardtype)`.   |
+| `returnKeyType`        | `string`                  | Determines how the return key should look. Same as React Native `[TextInput](https://reactnative.dev/docs/textinput#returnkeytype)`.          |
+| `placeholder`          | `string`                  | The string that will be rendered before text input has been entered.                                                                          |
+| `placeholderTextColor` | `ColorValue`              | The text color of the placeholder string.                                                                                                     |
+| `selectionColor`       | `ColorValue`              | The highlight and cursor color of the text input.                                                                                             |
+
 
 ## Style support
 
@@ -94,7 +96,7 @@ Implementation differs internally between platforms, but usage is the same for l
 
 ## Fonts
 
-In Expo projects, **`fontFamily` on this input only applies when the font is linked for native use**. Relying on runtime loading alone (`useFonts` / `loadAsync`) is often not enough here; use the **expo-font config plugin** so fonts are embedded at build time. See [Expo Font — Configuration in app config](https://docs.expo.dev/versions/latest/sdk/font/#configuration-in-app-config).
+In Expo projects, `**fontFamily` on this input only applies when the font is linked for native use**. Relying on runtime loading alone (`useFonts` / `loadAsync`) is often not enough here; use the **expo-font config plugin** so fonts are embedded at build time. See [Expo Font — Configuration in app config](https://docs.expo.dev/versions/latest/sdk/font/#configuration-in-app-config).
 
 ## Ref
 
@@ -107,8 +109,7 @@ In Expo projects, **`fontFamily` on this input only applies when the font is lin
 
 If you use [react-native-keyboard-controller](https://github.com/kirillzyusko/react-native-keyboard-controller) with this package, apply the patch below that matches **your** installed library version so keyboard-aware scrolling and focused-input layout stay correct (especially on Android).
 
-<details>
-<summary><code>1.20.7</code> (<code>react-native-keyboard-controller+1.20.7.patch</code>)</summary>
+`1.20.7` (`react-native-keyboard-controller+1.20.7.patch`)
 
 ```diff
 diff --git a/node_modules/react-native-keyboard-controller/android/src/main/java/com/reactnativekeyboardcontroller/extensions/EditText.kt b/node_modules/react-native-keyboard-controller/android/src/main/java/com/reactnativekeyboardcontroller/extensions/EditText.kt
@@ -199,7 +200,7 @@ index 1e7be51..373444b 100644
  import com.reactnativekeyboardcontroller.extensions.dp
  import com.reactnativekeyboardcontroller.extensions.emitEvent
 +import com.reactnativekeyboardcontroller.extensions.findReactControlledInputHostOrNull
-+import com.reactnativekeyboardcontroller.extensions.keyboardParentScrollViewTarget
++import com.reactnativekeyboardcontroller.exteыnsions.keyboardParentScrollViewTarget
  import com.reactnativekeyboardcontroller.extensions.parentScrollViewTarget
  import com.reactnativekeyboardcontroller.extensions.rootView
  import com.reactnativekeyboardcontroller.extensions.screenLocation
@@ -358,10 +359,9 @@ index 4b21666..e35f03c 100644
          },
 ```
 
-</details>
 
-<details>
-<summary><code>1.21.4</code> (<code>react-native-keyboard-controller+1.21.4.patch</code>)</summary>
+
+`1.21.4` (`react-native-keyboard-controller+1.21.4.patch`)
 
 ```diff
 diff --git a/node_modules/react-native-keyboard-controller/android/src/main/java/com/reactnativekeyboardcontroller/extensions/EditText.kt b/node_modules/react-native-keyboard-controller/android/src/main/java/com/reactnativekeyboardcontroller/extensions/EditText.kt
@@ -652,7 +652,7 @@ index 90586e84..e506d284 100644
            }
 ```
 
-</details>
+
 
 ## License
 
