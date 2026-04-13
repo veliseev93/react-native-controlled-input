@@ -27,6 +27,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.uimanager.UIManagerHelper
+import com.facebook.react.uimanager.events.Event
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -171,72 +172,137 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
     }
 
   /**
-   * Uses reflection to restore KBC's lastFocusedInput = focusProxy and call syncUpLayout(),
-   * so that KeyboardAwareScrollView receives the correct absoluteY / height to scroll to.
-   *
-   * Chain: EdgeToEdgeViewRegistry.get() → .callback → .layoutObserver → .lastFocusedInput / .syncUpLayout()
+   * EdgeToEdgeViewRegistry.get() → callback → FocusedInputObserver.
+   * Null if react-native-keyboard-controller is missing or not initialized.
    */
-  private fun restoreKbcTracking() {
-    Log.d(TAG, "restoreKbcTracking: starting reflection chain")
+  private fun resolveKbcFocusedInputObserver(): Any? {
     try {
-      // 1. EdgeToEdgeViewRegistry is a Kotlin object — access via INSTANCE field
       val registryClass =
         Class.forName("com.reactnativekeyboardcontroller.views.EdgeToEdgeViewRegistry")
       val registryInstance = registryClass.getField("INSTANCE").get(null)
       val edgeToEdgeView =
         registryClass.getDeclaredMethod("get").invoke(registryInstance)
           ?: run {
-            Log.w(TAG, "restoreKbcTracking: EdgeToEdgeViewRegistry.get() == null")
-            return
+            Log.w(TAG, "resolveKbcFocusedInputObserver: EdgeToEdgeViewRegistry.get() == null")
+            return null
           }
 
-      // 2. callback: KeyboardAnimationCallback (internal var — find by type)
       val callbackField =
         edgeToEdgeView.javaClass.declaredFields.firstOrNull {
           it.type.simpleName == "KeyboardAnimationCallback"
         }
           ?: run {
-            Log.w(TAG, "restoreKbcTracking: KeyboardAnimationCallback field not found")
-            return
+            Log.w(TAG, "resolveKbcFocusedInputObserver: KeyboardAnimationCallback field not found")
+            return null
           }
       callbackField.isAccessible = true
       val callback =
         callbackField.get(edgeToEdgeView)
           ?: run {
-            Log.w(TAG, "restoreKbcTracking: callback == null")
-            return
+            Log.w(TAG, "resolveKbcFocusedInputObserver: callback == null")
+            return null
           }
 
-      // 3. layoutObserver: FocusedInputObserver (internal var — find by type)
       val observerField =
         callback.javaClass.declaredFields.firstOrNull {
           it.type.simpleName == "FocusedInputObserver"
         }
           ?: run {
-            Log.w(TAG, "restoreKbcTracking: FocusedInputObserver field not found")
-            return
+            Log.w(TAG, "resolveKbcFocusedInputObserver: FocusedInputObserver field not found")
+            return null
           }
       observerField.isAccessible = true
-      val observer =
-        observerField.get(callback)
+      return observerField.get(callback)
+        ?: run {
+          Log.w(TAG, "resolveKbcFocusedInputObserver: layoutObserver == null")
+          null
+        }
+    } catch (_: ClassNotFoundException) {
+      Log.d(TAG, "resolveKbcFocusedInputObserver: keyboard-controller not on classpath")
+      return null
+    } catch (e: Exception) {
+      Log.w(TAG, "resolveKbcFocusedInputObserver: ${e.javaClass.simpleName}: ${e.message}")
+      return null
+    }
+  }
+
+  /** Approximate one line height in dp for JS customHeight when proxy has no Layout yet. */
+  private fun approximateSelectionEndYDp(): Double {
+    viewModel.inputStyle.value?.fontSize?.toDouble()?.takeIf { it > 0 }?.let { return it }
+    val dm = resources.displayMetrics
+    return (focusProxy.textSize / dm.density).toDouble().coerceAtLeast(12.0)
+  }
+
+  /**
+   * Synthetic topFocusedInputSelectionChanged without a compile dependency on KBC.
+   * Helps older KeyboardAwareScrollView when proxy never gets android.text.Layout in time.
+   */
+  private fun dispatchSyntheticKbcSelectionEvent(observer: Any) {
+    val reactContext = context as? ReactContext ?: return
+    try {
+      val epField = observer.javaClass.getDeclaredField("eventPropagationView")
+      epField.isAccessible = true
+      val propagationId = (epField.get(observer) as View).id
+
+      val surfaceId = UIManagerHelper.getSurfaceId(this)
+      val targetId = id
+      val endY = approximateSelectionEndYDp()
+
+      val dataClz =
+        Class.forName("com.reactnativekeyboardcontroller.events.FocusedInputSelectionChangedEventData")
+      val dataCtor =
+        dataClz.declaredConstructors.singleOrNull { it.parameterTypes.size == 7 }
           ?: run {
-            Log.w(TAG, "restoreKbcTracking: layoutObserver == null")
+            Log.w(TAG, "dispatchSyntheticKbcSelectionEvent: no 7-arg data ctor")
             return
           }
+      dataCtor.isAccessible = true
+      val data =
+        dataCtor.newInstance(targetId, 0.0, 0.0, 0.0, endY, 0, 0)
 
-      // 4. Set lastFocusedInput = focusProxy (private var)
+      val eventClz =
+        Class.forName("com.reactnativekeyboardcontroller.events.FocusedInputSelectionChangedEvent")
+      val eventCtor =
+        eventClz.getConstructor(
+          Int::class.javaPrimitiveType,
+          Int::class.javaPrimitiveType,
+          dataClz,
+        )
+      val event = eventCtor.newInstance(surfaceId, propagationId, data) as Event<*>
+
+      UIManagerHelper.getEventDispatcherForReactTag(reactContext, propagationId)
+        ?.dispatchEvent(event)
+      Log.d(
+        TAG,
+        "dispatchSyntheticKbcSelectionEvent: propagationId=$propagationId target=$targetId endY(dp)=$endY",
+      )
+    } catch (e: Exception) {
+      Log.w(TAG, "dispatchSyntheticKbcSelectionEvent: ${e.javaClass.simpleName}: ${e.message}")
+    }
+  }
+
+  /**
+   * Reflection: lastFocusedInput = focusProxy, syncUpLayout(), then synthetic selection
+   * so JS gets customHeight (selection.end.y) without waiting for KeyboardControllerSelectionWatcher.
+   */
+  private fun restoreKbcTracking() {
+    Log.d(TAG, "restoreKbcTracking: starting reflection chain")
+    try {
+      val observer = resolveKbcFocusedInputObserver() ?: return
+
       val lastFocusedField = observer.javaClass.getDeclaredField("lastFocusedInput")
       lastFocusedField.isAccessible = true
       lastFocusedField.set(observer, focusProxy)
       Log.d(TAG, "restoreKbcTracking: lastFocusedInput set to focusProxy")
 
-      // 5. Call syncUpLayout() — public fun, dispatches FocusedInputLayoutChangedEvent to JS
       val syncMethod = observer.javaClass.getDeclaredMethod("syncUpLayout")
       syncMethod.isAccessible = true
       syncMethod.invoke(observer)
-      Log.d(TAG, "restoreKbcTracking: ✅ syncUpLayout() invoked — KBC layout event sent to JS")
+      Log.d(TAG, "restoreKbcTracking: syncUpLayout() invoked")
+
+      dispatchSyntheticKbcSelectionEvent(observer)
     } catch (e: Exception) {
-      Log.w(TAG, "restoreKbcTracking: ❌ ${e.javaClass.simpleName}: ${e.message}")
+      Log.w(TAG, "restoreKbcTracking: ${e.javaClass.simpleName}: ${e.message}")
     }
   }
 
@@ -417,7 +483,7 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
               )
           },
           onFocus = {
-            Log.d(TAG, "━━ Compose onFocus ━━ id=$id isRestoring=$isRestoringComposeFocus")
+            Log.d(TAG, "Compose onFocus id=$id isRestoring=$isRestoringComposeFocus")
             if (isRestoringComposeFocus) {
               // Second onFocus triggered by focusRequester.requestFocus() inside the restoration
               // dance — KBC is being synced via reflection, keyboard is showing.
@@ -435,7 +501,7 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
             }
           },
           onBlur = {
-            Log.d(TAG, "━━ Compose onBlur ━━ id=$id proxyFocused=${focusProxy.isFocused}")
+            Log.d(TAG, "Compose onBlur id=$id proxyFocused=${focusProxy.isFocused}")
             if (focusProxy.isFocused) {
               // Proxy stole Android focus from AndroidComposeView → this blur is synthetic.
               // Restore Compose focus so the keyboard stays/re-appears.
