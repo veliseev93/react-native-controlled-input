@@ -1,5 +1,5 @@
 {
-  "name": "@ronas-it/react-native-controlled-input",
+  "name": "react-native-controlled-input",
   "version": "0.1.0-alpha.0",
   "description": "React Native controlled TextInput with strict value sync (Fabric)",
   "main": "./lib/module/index.js",
@@ -49,14 +49,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RonasIT/react-native-controlled-input.git"
+    "url": "git+https://github.com/veliseev93/react-native-controlled-input.git"
   },
-  "author": "RonasIT (https://github.com/RonasIT)",
+  "author": "veliseev93 (https://github.com/veliseev93)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/RonasIT/react-native-controlled-input/issues"
+    "url": "https://github.com/veliseev93/react-native-controlled-input/issues"
   },
-  "homepage": "https://github.com/RonasIT/react-native-controlled-input#readme",
+  "homepage": "https://github.com/veliseev93/react-native-controlled-input#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
@@ -141,10 +141,12 @@
     "increment": false,
     "git": {
       "commitMessage": "chore: release ${version}",
-      "tagName": "v${version}"
+      "tagName": "v${version}",
+      "requireBranch": ["main", "test-keboard--controller"]
     },
     "npm": {
-      "publish": true
+      "publish": true,
+      "tag": "alpha"
     },
     "github": {
       "release": true
