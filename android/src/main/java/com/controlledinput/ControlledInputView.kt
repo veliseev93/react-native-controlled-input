@@ -2,7 +2,6 @@ package com.controlledinput
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -32,14 +31,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 /**
  * - [shouldUseAndroidLayout]: requestLayout posts measureAndLayout
  * - onMeasure skips child [ComposeView] until attached (window + WindowRecomposer)
- *
- * @see expo.modules.kotlin.views.ExpoComposeView
- * @see expo.modules.kotlin.views.ExpoView
  */
 class ControlledInputView : LinearLayout, LifecycleOwner {
-  companion object {
-    private const val TAG = "ControlledInputView"
-  }
   constructor(context: Context) : super(context) {
     configureComponent(context)
   }
@@ -67,8 +60,9 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
   private var windowLifecycleBound = false
 
   /**
-   * Hidden [EditText] used only as KBC's [FocusedInputObserver.lastFocusedInput]: [syncUpLayout]
-   * reads [EditText]-scoped geometry. It is NOT focused and does not participate in the focus
+   * Hidden [EditText] used only as [FocusedInputObserver.lastFocusedInput] from
+   * https://github.com/kirillzyusko/react-native-keyboard-controller; [syncUpLayout] reads
+   * [EditText]-scoped geometry. It is NOT focused and does not participate in the focus
    * chain — we push state via reflection + synthetic selection events instead.
    */
   private val kbcLayoutHost: EditText by lazy {
@@ -85,8 +79,9 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
   }
 
   /**
-   * EdgeToEdgeViewRegistry → KeyboardAnimationCallback + FocusedInputObserver.
-   * Null if react-native-keyboard-controller is missing or not initialized.
+   * EdgeToEdgeViewRegistry → KeyboardAnimationCallback + FocusedInputObserver
+   * (https://github.com/kirillzyusko/react-native-keyboard-controller).
+   * Null if that library is missing or not initialized.
    */
   private fun resolveKbcCallbackAndObserver(): Pair<Any, Any>? {
     try {
@@ -94,49 +89,25 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
         Class.forName("com.reactnativekeyboardcontroller.views.EdgeToEdgeViewRegistry")
       val registryInstance = registryClass.getField("INSTANCE").get(null)
       val edgeToEdgeView =
-        registryClass.getDeclaredMethod("get").invoke(registryInstance)
-          ?: run {
-            Log.w(TAG, "resolveKbcCallbackAndObserver: EdgeToEdgeViewRegistry.get() == null")
-            return null
-          }
+        registryClass.getDeclaredMethod("get").invoke(registryInstance) ?: return null
 
       val callbackField =
         edgeToEdgeView.javaClass.declaredFields.firstOrNull {
           it.type.simpleName == "KeyboardAnimationCallback"
-        }
-          ?: run {
-            Log.w(TAG, "resolveKbcCallbackAndObserver: KeyboardAnimationCallback field not found")
-            return null
-          }
+        } ?: return null
       callbackField.isAccessible = true
-      val callback =
-        callbackField.get(edgeToEdgeView)
-          ?: run {
-            Log.w(TAG, "resolveKbcCallbackAndObserver: callback == null")
-            return null
-          }
+      val callback = callbackField.get(edgeToEdgeView) ?: return null
 
       val observerField =
         callback.javaClass.declaredFields.firstOrNull {
           it.type.simpleName == "FocusedInputObserver"
-        }
-          ?: run {
-            Log.w(TAG, "resolveKbcCallbackAndObserver: FocusedInputObserver field not found")
-            return null
-          }
+        } ?: return null
       observerField.isAccessible = true
-      val observer =
-        observerField.get(callback)
-          ?: run {
-            Log.w(TAG, "resolveKbcCallbackAndObserver: layoutObserver == null")
-            return null
-          }
+      val observer = observerField.get(callback) ?: return null
       return Pair(callback, observer)
     } catch (_: ClassNotFoundException) {
-      Log.d(TAG, "resolveKbcCallbackAndObserver: keyboard-controller not on classpath")
       return null
-    } catch (e: Exception) {
-      Log.w(TAG, "resolveKbcCallbackAndObserver: ${e.javaClass.simpleName}: ${e.message}")
+    } catch (_: Exception) {
       return null
     }
   }
@@ -146,9 +117,7 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
       val f = callback.javaClass.getDeclaredField("viewTagFocused")
       f.isAccessible = true
       f.setInt(callback, id)
-      Log.d(TAG, "setKbcViewTagFocused: viewTagFocused=$id")
-    } catch (e: Exception) {
-      Log.w(TAG, "setKbcViewTagFocused: ${e.javaClass.simpleName}: ${e.message}")
+    } catch (_: Exception) {
     }
   }
 
@@ -160,14 +129,14 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
       holderClass
         .getMethod("set", EditText::class.java)
         .invoke(instance, kbcLayoutHost)
-    } catch (e: Exception) {
-      Log.w(TAG, "setKbcFocusedInputHolder: ${e.javaClass.simpleName}: ${e.message}")
+    } catch (_: Exception) {
     }
   }
 
   /**
-   * `selection.end.y` for KBC / JS customHeight: prefer explicit style height (dp, same as padding
-   * in [InputStyle]), else measured view height in dp.
+   * `selection.end.y` for https://github.com/kirillzyusko/react-native-keyboard-controller / JS
+   * customHeight: prefer explicit style height (dp, same as padding in [InputStyle]), else measured
+   * view height in dp.
    */
   private fun approximateSelectionEndYDp(): Double {
     viewModel.inputStyle.value?.height?.takeIf { it > 0 }?.let { return it }
@@ -192,11 +161,7 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
       val dataClz =
         Class.forName("com.reactnativekeyboardcontroller.events.FocusedInputSelectionChangedEventData")
       val dataCtor =
-        dataClz.declaredConstructors.singleOrNull { it.parameterTypes.size == 7 }
-          ?: run {
-            Log.w(TAG, "dispatchSyntheticKbcSelectionEvent: no 7-arg data ctor")
-            return
-          }
+        dataClz.declaredConstructors.singleOrNull { it.parameterTypes.size == 7 } ?: return
       dataCtor.isAccessible = true
       val data =
         dataCtor.newInstance(targetId, 0.0, 0.0, 0.0, endY, 0, 0)
@@ -213,21 +178,16 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
 
       UIManagerHelper.getEventDispatcherForReactTag(reactContext, propagationId)
         ?.dispatchEvent(event)
-      Log.d(
-        TAG,
-        "dispatchSyntheticKbcSelectionEvent: propagationId=$propagationId target=$targetId endY(dp)=$endY",
-      )
-    } catch (e: Exception) {
-      Log.w(TAG, "dispatchSyntheticKbcSelectionEvent: ${e.javaClass.simpleName}: ${e.message}")
+    } catch (_: Exception) {
     }
   }
 
   /**
-   * Pushes ControlledInput state into KBC without stealing Compose focus:
-   * viewTagFocused, lastFocusedInput, FocusedInputHolder, syncUpLayout, synthetic selection.
+   * Pushes ControlledInput state into https://github.com/kirillzyusko/react-native-keyboard-controller
+   * without stealing Compose focus: viewTagFocused, lastFocusedInput, FocusedInputHolder,
+   * syncUpLayout, synthetic selection.
    */
   private fun syncKeyboardControllerFocusedInput() {
-    Log.d(TAG, "syncKeyboardControllerFocusedInput: id=$id")
     kbcLayoutHost.id = id
     viewModel.inputStyle.value?.fontSize?.toFloat()?.let {
       kbcLayoutHost.setTextSize(TypedValue.COMPLEX_UNIT_SP, it)
@@ -246,11 +206,9 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
       val syncMethod = observer.javaClass.getDeclaredMethod("syncUpLayout")
       syncMethod.isAccessible = true
       syncMethod.invoke(observer)
-      Log.d(TAG, "syncKeyboardControllerFocusedInput: syncUpLayout() ok")
 
       dispatchSyntheticKbcSelectionEvent(observer)
-    } catch (e: Exception) {
-      Log.w(TAG, "syncKeyboardControllerFocusedInput: ${e.javaClass.simpleName}: ${e.message}")
+    } catch (_: Exception) {
     }
   }
 
@@ -259,11 +217,6 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
   override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
     super.onLayout(changed, l, t, r, b)
     kbcLayoutHost.layout(0, 0, width, height)
-    if (changed) {
-      val loc = IntArray(2)
-      getLocationOnScreen(loc)
-      Log.d(TAG, "onLayout: view=${width}x${height} screenX=${loc[0]} screenY=${loc[1]}")
-    }
   }
 
   override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -295,12 +248,10 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
-    Log.d(TAG, "onAttachedToWindow: id=$id")
     bindComposeToWindowLifecycle()
   }
 
   override fun onDetachedFromWindow() {
-    Log.d(TAG, "onDetachedFromWindow: id=$id")
     if (usesLocalFallbackLifecycle) {
       lifecycleRegistry.currentState = Lifecycle.State.CREATED
     }
@@ -345,7 +296,6 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
   }
 
   fun blur() {
-    Log.d(TAG, "blur() called from JS ref")
     blurSignal.value = blurSignal.value + 1
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(windowToken, 0)
@@ -353,7 +303,6 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
   }
 
   fun focus() {
-    Log.d(TAG, "focus() called from JS ref")
     focusSignal.value = focusSignal.value + 1
   }
 
@@ -421,7 +370,6 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
               )
           },
           onFocus = {
-            Log.d(TAG, "Compose onFocus id=$id")
             val surfaceId = UIManagerHelper.getSurfaceId(context)
             val viewId = this@ControlledInputView.id
             UIManagerHelper
@@ -430,7 +378,6 @@ class ControlledInputView : LinearLayout, LifecycleOwner {
             post { syncKeyboardControllerFocusedInput() }
           },
           onBlur = {
-            Log.d(TAG, "Compose onBlur id=$id")
             val surfaceId = UIManagerHelper.getSurfaceId(context)
             val viewId = this@ControlledInputView.id
             UIManagerHelper
