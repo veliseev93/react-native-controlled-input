@@ -43,6 +43,12 @@ using namespace facebook::react;
   return self;
 }
 
+- (void)setTag:(NSInteger)tag
+{
+  [super setTag:tag];
+  _inputView.tag = tag;
+}
+
 - (void)updateProps:(Props::Shared const &)props oldProps:(Props::Shared const &)oldProps
 {
     const auto &oldViewProps = *std::static_pointer_cast<ControlledInputViewProps const>(_props);

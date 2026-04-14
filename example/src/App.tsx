@@ -1,4 +1,3 @@
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useRef, useState, type ReactElement } from 'react';
 import { StyleSheet, View, Text, Button, TextInput } from 'react-native';
 import {
@@ -57,9 +56,7 @@ export default function App(): ReactElement {
   return (
     <GestureHandlerRootView style={styles.root}>
       <KeyboardProvider>
-        <BottomSheetModalProvider>
-          <InputScreen />
-        </BottomSheetModalProvider>
+        <InputScreen />
       </KeyboardProvider>
     </GestureHandlerRootView>
   );

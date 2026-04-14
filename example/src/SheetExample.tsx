@@ -1,12 +1,8 @@
-import {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetScrollView,
-} from '@gorhom/bottom-sheet';
-import { type BottomSheetDefaultBackdropProps } from '@gorhom/bottom-sheet/src/components/bottomSheetBackdrop/types';
-import { useRef, useState, type ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import {
   Button,
+  Modal,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -15,8 +11,6 @@ import {
 } from 'react-native';
 import { ControlledInputView } from 'react-native-controlled-input';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-
-const SNAP_POINTS = ['75%'];
 
 function SheetHeader({
   onCancel,
@@ -44,7 +38,12 @@ function SheetContent({ onClose }: { onClose: () => void }): ReactElement {
   const [notes, setNotes] = useState('');
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.container}>
+    <KeyboardAwareScrollView
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps='handled'
+      mode='layout'
+    >
+      <View style={styles.handlePill} />
       <SheetHeader onCancel={onClose} onDone={onClose} />
 
       <View style={styles.section}>
@@ -110,54 +109,63 @@ function SheetContent({ onClose }: { onClose: () => void }): ReactElement {
   );
 }
 
-function renderBackdrop(props: BottomSheetDefaultBackdropProps): ReactElement {
-  return (
-    <BottomSheetBackdrop
-      {...props}
-      disappearsOnIndex={-1}
-      appearsOnIndex={0}
-      pressBehavior='close'
-    />
-  );
-}
-
 export function SheetExample(): ReactElement {
-  const sheetRef = useRef<BottomSheetModal>(null);
+  const [visible, setVisible] = useState(false);
 
-  const open = (): void => {
-    console.log('open')
-    sheetRef.current?.present()
-  };
-  const close = (): void => sheetRef.current?.dismiss();
+  const close = (): void => setVisible(false);
 
   return (
     <>
-      <Button title='Open Sheet' onPress={open} />
-      <BottomSheetModal
-        ref={sheetRef}
-        snapPoints={SNAP_POINTS}
-        keyboardBehavior='extend'
-        keyboardBlurBehavior='restore'
-        android_keyboardInputMode='adjustResize'
-        backdropComponent={renderBackdrop}
-        handleIndicatorStyle={styles.handle}
-        backgroundStyle={styles.sheetBackground}
+      <Button
+        title='Open Sheet'
+        onPress={() => {
+          console.log('open');
+          setVisible(true);
+        }}
+      />
+      <Modal
+        visible={visible}
+        transparent
+        animationType='fade'
+        onRequestClose={close}
+        statusBarTranslucent
       >
-        <SheetContent onClose={close} />
-      </BottomSheetModal>
+        <View style={styles.modalRoot}>
+          <Pressable style={styles.backdrop} onPress={close} />
+          <View style={styles.sheet}>
+            <SheetContent onClose={close} />
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  handle: {
-    backgroundColor: '#DCDDE1',
-    width: 36,
+  modalRoot: {
+    flex: 1,
+    justifyContent: 'flex-end',
   },
-  sheetBackground: {
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  },
+  sheet: {
+    maxHeight: '75%',
+    width: '100%',
     backgroundColor: '#1C1C1E',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
+    overflow: 'hidden',
+  },
+  handlePill: {
+    alignSelf: 'center',
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#DCDDE1',
+    marginTop: 8,
+    marginBottom: 4,
   },
   header: {
     flexDirection: 'row',
@@ -185,7 +193,6 @@ const styles = StyleSheet.create({
   container: {
     gap: 24,
     paddingBottom: 40,
-    height: '100%',
   },
   section: {
     gap: 8,
