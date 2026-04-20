@@ -1,6 +1,35 @@
-# react-native-controlled-input
+# @ronas-it/react-native-controlled-input
 
 A controlled React Native input that lets you format and constrain the value exactly how you want in JS, while keeping the displayed text in sync without invalid characters flashing in the field.
+
+**`ControlledInputView`** (left) vs React Native **`TextInput`** (right), same JS formatting: with `TextInput`, rejected characters and intermediate states often flash until the filtered `value` is applied.
+
+### Promo / invite code (ABCD-1234)
+
+<table cellspacing="24" cellpadding="0">
+<tr>
+<td align="center" valign="top" width="50%"><strong>ControlledInputView</strong><br><br><video src="assets/promo-code-controlled-input.mp4" controls playsinline width="100%"></video></td>
+<td align="center" valign="top" width="50%"><strong>TextInput</strong><br><br><video src="assets/promo-code-default-input.mp4" controls playsinline width="100%"></video></td>
+</tr>
+</table>
+
+### Card expiry (MM/YY)
+
+<table cellspacing="24" cellpadding="0">
+<tr>
+<td align="center" valign="top" width="50%"><strong>ControlledInputView</strong><br><br><video src="assets/date-controlled-input.mp4" controls playsinline width="100%"></video></td>
+<td align="center" valign="top" width="50%"><strong>TextInput</strong><br><br><video src="assets/date-default-input.mp4" controls playsinline width="100%"></video></td>
+</tr>
+</table>
+
+### Phone (+1 (___) ___-__-__)
+
+<table cellspacing="24" cellpadding="0">
+<tr>
+<td align="center" valign="top" width="50%"><strong>ControlledInputView</strong><br><br><video src="assets/phone-controlled-input.mp4" controls playsinline width="100%"></video></td>
+<td align="center" valign="top" width="50%"><strong>TextInput</strong><br><br><video src="assets/phone-default-input.mp4" controls playsinline width="100%"></video></td>
+</tr>
+</table>
 
 ## Problem
 
@@ -8,15 +37,18 @@ With a regular controlled `TextInput`, native input is applied first, then JS re
 
 That means invalid characters can still flash in the field for a moment.
 
-`react-native-controlled-input` is built for this exact case: you decide what text is valid, and the displayed value stays driven by `value`.
+`@ronas-it/react-native-controlled-input` is built for this exact case: you decide what text is valid, and the displayed value stays driven by `value`.
+
 
 ## Install
 
 ```sh
-npm install react-native-controlled-input
+npm install @ronas-it/react-native-controlled-input
 ```
 
 Requires React Native New Architecture / Fabric.
+
+Compatible with [`react-native-keyboard-controller`](https://github.com/kirillzyusko/react-native-keyboard-controller).
 
 ## Example
 
@@ -26,7 +58,7 @@ import { StyleSheet } from 'react-native';
 import {
   ControlledInputView,
   type ControlledInputViewRef,
-} from 'react-native-controlled-input';
+} from '@ronas-it/react-native-controlled-input';
 
 export function Example() {
   const [value, setValue] = useState('');
@@ -91,6 +123,10 @@ Commonly used supported styles:
 - layout styles like `width`, `height`, `margin`, `flex`
 
 Implementation differs internally between platforms, but usage is the same for library consumers.
+
+## Fonts
+
+In Expo projects, **`fontFamily` on this input only applies when the font is linked for native use**. Relying on runtime loading alone (`useFonts` / `loadAsync`) is often not enough here; use the **expo-font config plugin** so fonts are embedded at build time. See [Expo Font — Configuration in app config](https://docs.expo.dev/versions/latest/sdk/font/#configuration-in-app-config).
 
 ## Ref
 
