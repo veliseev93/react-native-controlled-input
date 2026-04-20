@@ -6,30 +6,15 @@ A controlled React Native input that lets you format and constrain the value exa
 
 ### Promo / invite code (ABCD-1234)
 
-<table cellspacing="24" cellpadding="0">
-<tr>
-<td align="center" valign="top" width="50%"><strong>ControlledInputView</strong><br><br><video src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/promo-code-controlled-input.mp4" controls playsinline width="100%"></video></td>
-<td align="center" valign="top" width="50%"><strong>TextInput</strong><br><br><video src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/promo-code-default-input.mp4" controls playsinline width="100%"></video></td>
-</tr>
-</table>
+| ControlledInputView | TextInput |
+| :-----------------: | :-------: |
+| <img src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/promo-code-controlled-input.gif" alt="ControlledInputView promo code" width="325"> | <img src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/promo-code-default-input.gif" alt="TextInput promo code" width="325"> |
 
 ### Card expiry (MM/YY)
 
-<table cellspacing="24" cellpadding="0">
-<tr>
-<td align="center" valign="top" width="50%"><strong>ControlledInputView</strong><br><br><video src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/date-controlled-input.mp4" controls playsinline width="100%"></video></td>
-<td align="center" valign="top" width="50%"><strong>TextInput</strong><br><br><video src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/date-default-input.mp4" controls playsinline width="100%"></video></td>
-</tr>
-</table>
-
-### Phone (+1 (___) ___-__-__)
-
-<table cellspacing="24" cellpadding="0">
-<tr>
-<td align="center" valign="top" width="50%"><strong>ControlledInputView</strong><br><br><video src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/phone-controlled-input.mp4" controls playsinline width="100%"></video></td>
-<td align="center" valign="top" width="50%"><strong>TextInput</strong><br><br><video src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/phone-default-input.mp4" controls playsinline width="100%"></video></td>
-</tr>
-</table>
+| ControlledInputView | TextInput |
+| :-----------------: | :-------: |
+| <img src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/date-controlled-input.gif" alt="ControlledInputView date" width="325"> | <img src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/date-default-input.gif" alt="TextInput date" width="325"> |
 
 ## Problem
 
