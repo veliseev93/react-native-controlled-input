@@ -8,13 +8,13 @@ A controlled React Native input that lets you format and constrain the value exa
 
 | ControlledInputView | TextInput |
 | :-----------------: | :-------: |
-| <img src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/promo-code-controlled-input.gif" alt="ControlledInputView promo code" width="325"> | <img src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/promo-code-default-input.gif" alt="TextInput promo code" width="325"> |
+| <img src="assets/promo-code-controlled-input.gif" alt="ControlledInputView promo code" width="325"> | <img src="./assets/promo-code-default-input.gif" alt="TextInput promo code" width="325"> |
 
 ### Card expiry (MM/YY)
 
 | ControlledInputView | TextInput |
 | :-----------------: | :-------: |
-| <img src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/date-controlled-input.gif" alt="ControlledInputView date" width="325"> | <img src="https://raw.githubusercontent.com/veliseev93/react-native-controlled-input/main/assets/date-default-input.gif" alt="TextInput date" width="325"> |
+| <img src="assets/date-controlled-input.gif" alt="ControlledInputView date" width="325"> | <img src="./assets/date-default-input.gif" alt="TextInput date" width="325"> |
 
 ## Problem
 
